@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<attr name="uri" format="string"/>-->
+
+    <!--<declare-styleable name="ImageView">-->
+        <!--<attr name="clickCommand"/>-->
+        <!--<attr name="uri"/>-->
+    <!--</declare-styleable>-->
+</resources>
