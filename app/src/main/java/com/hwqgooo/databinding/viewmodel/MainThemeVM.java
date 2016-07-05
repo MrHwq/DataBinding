@@ -16,18 +16,22 @@ import rx.functions.Action0;
  */
 public class MainThemeVM extends BaseObservable implements IToolbarState {
     public final static String TAG = "MainThemeVM";
+    private Context context;
     private int selectColor;
     private int unselectColor;
+    private int toolbalState = -1;
     private String toolbarTitle;
     public String toolbarImage;
-    private int toolbalState = -1;
+    private String[] appbarName;
 
     static MainThemeVM instance;
 
     private MainThemeVM(Context context) {
+        this.context = context;
         selectColor = context.getResources().getColor(R.color.colorPrimary);
         unselectColor = context.getResources().getColor(R.color.colorAccent);
-        toolbarTitle = "完全展开";
+        appbarName = context.getResources().getStringArray(R.array.appbarname);
+        toolbarTitle = appbarName[EXPANDED];
     }
 
     public static MainThemeVM getInstance(Context context) {
@@ -82,11 +86,11 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
     public void setToolbarState(int state) {
         this.toolbalState = state;
         if (state == EXPANDED) {
-            setToolbarTitle("完全展开");
+            setToolbarTitle(appbarName[EXPANDED]);
         } else if (state == COLLAPSED) {
-            setToolbarTitle("完全收缩");
+            setToolbarTitle(appbarName[COLLAPSED]);
         } else if (state == INTERNEDIATE) {
-            setToolbarTitle("中间态");
+            setToolbarTitle(appbarName[INTERNEDIATE]);
         } else {
             setToolbarTitle("未知" + state);
         }

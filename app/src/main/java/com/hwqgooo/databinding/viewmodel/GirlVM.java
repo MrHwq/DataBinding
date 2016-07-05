@@ -1,9 +1,9 @@
 package com.hwqgooo.databinding.viewmodel;
 
 import android.content.Context;
-import android.databinding.BaseObservable;
+import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
-import android.support.v7.widget.RecyclerView;
+import android.databinding.ObservableList;
 import android.util.Log;
 
 import com.hwqgooo.databinding.command.ReplyCommand;
@@ -12,7 +12,6 @@ import com.hwqgooo.databinding.model.bean.Girl;
 import com.hwqgooo.databinding.model.bean.GirlData;
 
 import java.net.SocketTimeoutException;
-import java.util.LinkedList;
 import java.util.List;
 
 import retrofit2.Retrofit;
@@ -29,16 +28,15 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by weiqiang on 2016/7/4.
  */
-public class GirlVM extends BaseObservable {
+public class GirlVM {
     public static final String TAG = "GirlVM";
-    private List<Girl> girls = new LinkedList<>();
+    private ObservableList<Girl> girls = new ObservableArrayList<>();
     public ObservableBoolean isRefreshing = new ObservableBoolean(false);
 
     final String baseUrl = "http://gank.io/api/";
     Retrofit mRetrofit;
     IGirlService girlService;
     CompositeSubscription compositeSubscription;
-    RecyclerView.Adapter adapter;
 
     int count = 0;
     Context context;
@@ -54,8 +52,8 @@ public class GirlVM extends BaseObservable {
         this.context = context;
     }
 
-    public void setAdapter(RecyclerView.Adapter adapter) {
-        this.adapter = adapter;
+    public void onDestory() {
+        compositeSubscription.unsubscribe();
     }
 
     private void load(final boolean isRefresh) {
@@ -101,7 +99,6 @@ public class GirlVM extends BaseObservable {
                                         .getUrl());
                         int pos = girls.size();
                         girls.addAll(girlList);
-                        adapter.notifyItemRangeChanged(pos, girls.size());
                     }
                 }));
     }
@@ -118,7 +115,7 @@ public class GirlVM extends BaseObservable {
         }
     });
 
-    public List<Girl> getGirls() {
+    public ObservableList<Girl> getGirls() {
         return girls;
     }
 
@@ -131,7 +128,7 @@ public class GirlVM extends BaseObservable {
                 return;
             }
             page = 1;
-            Log.d(TAG, "call: onRefresh" + page);
+            Log.d(TAG, "call: onRefresh " + page);
             load(true);
         }
     });

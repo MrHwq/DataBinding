@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">DataBinding</string>
+    <string-array name="appbarname">
+        <item>完全展开</item>
+        <item>完全收缩</item>
+        <item>中间态</item>
+    </string-array>
 </resources>

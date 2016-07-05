@@ -20,6 +20,7 @@ import com.hwqgooo.databinding.viewmodel.GirlVM;
  * Created by weiqiang on 2016/7/2.
  */
 public class GirlFragment extends Fragment {
+    final static String TAG = "GirlFragment";
     FragmentGirlBinding binding;
     Context context;
     GirlVM girlVm;
@@ -44,8 +45,7 @@ public class GirlFragment extends Fragment {
     }
 
     private void setRecylerView() {
-        GirlAdapter girlAdapter = new GirlAdapter(context, girlVm.getGirls());
-        girlVm.setAdapter(girlAdapter);
+        final GirlAdapter girlAdapter = new GirlAdapter(context, girlVm.getGirls());
         binding.girlview.setAdapter(girlAdapter);
         StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2,
                 StaggeredGridLayoutManager.VERTICAL);
@@ -82,5 +82,11 @@ public class GirlFragment extends Fragment {
             isload = true;
             girlVm.onRefresh.execute();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        girlVm.onDestory();
     }
 }

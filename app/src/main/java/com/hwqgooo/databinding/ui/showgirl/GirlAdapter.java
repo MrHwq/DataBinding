@@ -2,6 +2,7 @@ package com.hwqgooo.databinding.ui.showgirl;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.databinding.ObservableList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,6 @@ import com.hwqgooo.databinding.model.bean.Girl;
 import com.hwqgooo.databinding.utils.recyclerview.BaseRecyclerViewAdapter;
 import com.hwqgooo.databinding.utils.recyclerview.ViewHolderInject;
 
-import java.util.List;
-
 /**
  * Created by weiqiang on 2016/7/4.
  */
@@ -23,7 +22,7 @@ public class GirlAdapter extends BaseRecyclerViewAdapter<Girl> {
         super(context);
     }
 
-    public GirlAdapter(Context context, List<Girl> data) {
+    public GirlAdapter(Context context, ObservableList<Girl> data) {
         super(context, data);
     }
 
