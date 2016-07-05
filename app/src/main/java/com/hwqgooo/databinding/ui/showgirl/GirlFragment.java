@@ -22,12 +22,13 @@ import com.hwqgooo.databinding.viewmodel.GirlVM;
 public class GirlFragment extends Fragment {
     FragmentGirlBinding binding;
     Context context;
-    GirlVM girlVm = new GirlVM();
+    GirlVM girlVm;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
+        girlVm = new GirlVM(context);
     }
 
     @Nullable

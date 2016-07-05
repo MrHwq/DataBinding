@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         this.getResources().getColor(R.color.colorPrimary);
-        vm = new MainThemeVM(this);
+        vm = MainThemeVM.getInstance(this);
         binding.setMainthemevm(vm);
         binding.setOnOffsetChangedListener(new OnMyOffsetChangedListener());
         initTab();

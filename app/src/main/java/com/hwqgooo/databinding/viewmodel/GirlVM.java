@@ -1,5 +1,6 @@
 package com.hwqgooo.databinding.viewmodel;
 
+import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableBoolean;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +30,7 @@ import rx.subscriptions.CompositeSubscription;
  * Created by weiqiang on 2016/7/4.
  */
 public class GirlVM extends BaseObservable {
+    public static final String TAG = "GirlVM";
     private List<Girl> girls = new LinkedList<>();
     public ObservableBoolean isRefreshing = new ObservableBoolean(false);
 
@@ -39,8 +41,9 @@ public class GirlVM extends BaseObservable {
     RecyclerView.Adapter adapter;
 
     int count = 0;
+    Context context;
 
-    public GirlVM() {
+    public GirlVM(Context context) {
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -48,6 +51,7 @@ public class GirlVM extends BaseObservable {
                 .build();
         girlService = mRetrofit.create(IGirlService.class);
         compositeSubscription = new CompositeSubscription();
+        this.context = context;
     }
 
     public void setAdapter(RecyclerView.Adapter adapter) {
@@ -69,7 +73,7 @@ public class GirlVM extends BaseObservable {
                 .subscribe(new Subscriber<List<Girl>>() {
                     @Override
                     public void onCompleted() {
-                        Log.d("hwqhwq", isRefresh ? "onRefresh" : "onLoadMore" + " onCompleted: ");
+                        Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onCompleted: ");
                         isRefreshing.set(false);
                         page++;
                     }
@@ -77,7 +81,7 @@ public class GirlVM extends BaseObservable {
                     @Override
                     public void onError(Throwable e) {
                         if (e instanceof SocketTimeoutException) {
-                            Log.d("hwqhwq", isRefresh ? "onRefresh" : "onLoadMore" + " onError: " +
+                            Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onError: " +
                                     "SocketTimeoutException");
                         } else {
                             e.printStackTrace();
@@ -90,6 +94,11 @@ public class GirlVM extends BaseObservable {
                         if (isRefresh) {
                             girls.clear();
                         }
+
+                        MainThemeVM.getInstance(context)
+                                .setToolbarImage(girlList.get((int) (girlList.size() * Math
+                                        .random()))
+                                        .getUrl());
                         int pos = girls.size();
                         girls.addAll(girlList);
                         adapter.notifyItemRangeChanged(pos, girls.size());
@@ -101,10 +110,10 @@ public class GirlVM extends BaseObservable {
         @Override
         public void call() {
             if (isRefreshing.get()) {
-                Log.d("hwqhwq", "call: onLoadMore is refreshing");
+                Log.d(TAG, "call: onLoadMore is refreshing");
                 return;
             }
-            Log.d("hwqhwq", "call: onLoadMore " + page);
+            Log.d(TAG, "call: onLoadMore " + page);
             load(false);
         }
     });
@@ -118,11 +127,11 @@ public class GirlVM extends BaseObservable {
         @Override
         public void call() {
             if (isRefreshing.get()) {
-                Log.d("hwqhwq", "call: onRefresh is refreshing");
+                Log.d(TAG, "call: onRefresh is refreshing");
                 return;
             }
             page = 1;
-            Log.d("hwqhwq", "call: onRefresh" + page);
+            Log.d(TAG, "call: onRefresh" + page);
             load(true);
         }
     });

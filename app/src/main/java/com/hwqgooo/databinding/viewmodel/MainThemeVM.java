@@ -15,17 +15,26 @@ import rx.functions.Action0;
  * Created by weiqiang on 2016/7/3.
  */
 public class MainThemeVM extends BaseObservable implements IToolbarState {
+    public final static String TAG = "MainThemeVM";
     private int selectColor;
     private int unselectColor;
     private String toolbarTitle;
-    private String toolbarImage;
+    public String toolbarImage;
     private int toolbalState = -1;
 
-    public MainThemeVM(Context context) {
+    static MainThemeVM instance;
+
+    private MainThemeVM(Context context) {
         selectColor = context.getResources().getColor(R.color.colorPrimary);
         unselectColor = context.getResources().getColor(R.color.colorAccent);
         toolbarTitle = "完全展开";
-        toolbarImage = "http://ww4.sinaimg.cn/mw690/c0ef8f4cgw1f56736cr9jg20dc07ix6q.gif";
+    }
+
+    public static MainThemeVM getInstance(Context context) {
+        if (instance == null) {
+            instance = new MainThemeVM(context);
+        }
+        return instance;
     }
 
     @Bindable
@@ -66,6 +75,7 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
     public void setToolbarImage(String toolbarImage) {
         this.toolbarImage = toolbarImage;
         notifyPropertyChanged(BR.toolbarImage);
+        Log.d(TAG, "setToolbarImage: " + toolbarImage);
     }
 
     @Override
@@ -90,11 +100,7 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
     public final ReplyCommand onClick = new ReplyCommand(new Action0() {
         @Override
         public void call() {
-            if (!getToolbarImage().equals("http://ww1.sinaimg" +
-                    ".cn/mw600/006a0xdJjw1evqbhuxoi7g30c806vb07.gif")) {
-                Log.d("hwqhwq", "call: onclick");
-                setToolbarImage("http://ww1.sinaimg.cn/mw600/006a0xdJjw1evqbhuxoi7g30c806vb07.gif");
-            }
+            Log.d(TAG, "call: imageview onClick");
         }
     });
 }
