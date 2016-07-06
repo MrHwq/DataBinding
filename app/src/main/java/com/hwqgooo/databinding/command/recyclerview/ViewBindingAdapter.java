@@ -11,10 +11,12 @@ import com.hwqgooo.databinding.utils.recyclerview.OnRcvScrollListener;
  * Created by weiqiang on 2016/7/5.
  */
 public class ViewBindingAdapter {
+    public static final String TAG = "RcvViewBindingAdapter";
+
     @BindingAdapter({"onLoadMoreCommand"})
     public static void onLoadMoreCommand(RecyclerView recyclerView, final ReplyCommand
             onLoadMoreCommand) {
-        Log.d("hwqhwq", "onLoadMoreCommand: ");
+        Log.d(TAG, "onLoadMoreCommand: ");
         recyclerView.addOnScrollListener(new OnRcvScrollListener() {
             @Override
             public void onBottom() {

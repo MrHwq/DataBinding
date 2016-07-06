@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 public class ViewBindingAdapter {
     public final static String TAG = "ImageViewBindingAdapter";
@@ -15,7 +16,11 @@ public class ViewBindingAdapter {
         try {
             Log.d(TAG, "imageview load uri " + uri);
             if (!TextUtils.isEmpty(uri)) {
-                Glide.with(iv.getContext()).load(uri).fitCenter().into(iv);
+                Glide.with(iv.getContext())
+                        .load(uri)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .fitCenter()
+                        .into(iv);
             } else {
                 iv.setBackgroundDrawable(null);
             }

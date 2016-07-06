@@ -62,4 +62,10 @@ public class MainActivity extends AppCompatActivity {
         binding.viewpager.setAdapter(tabs);
         binding.tablayout.setupWithViewPager(binding.viewpager);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MainThemeVM.getInstance(this).onDestory();
+    }
 }

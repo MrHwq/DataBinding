@@ -7,6 +7,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
 /**
  * Created by weiqiang on 2016/6/6.
  */
@@ -47,27 +51,55 @@ public abstract class BaseRecyclerViewAdapter<T> extends RecyclerView.Adapter<Vi
         }
 
         @Override
-        public void onItemRangeChanged(ObservableList<T> girls, int i, int i1) {
-            notifyItemRangeChanged(i, i1);
-            Log.d(TAG, "onItemRangeChanged: " + i + ",," + i1);
+        public void onItemRangeChanged(ObservableList<T> girls, final int i, final int i1) {
+            Observable.just("onItemRangeChanged")
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            notifyItemRangeChanged(i, i1);
+                            Log.d(TAG, "onItemRangeChanged: " + i + ",," + i1);
+                        }
+                    });
         }
 
         @Override
-        public void onItemRangeInserted(ObservableList<T> girls, int i, int i1) {
-            Log.d(TAG, "onItemRangeInserted: " + i + ",," + i1);
-            notifyItemRangeInserted(i, i1);
+        public void onItemRangeInserted(ObservableList<T> girls, final int i, final int i1) {
+            Observable.just("onItemRangeInserted")
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            Log.d(TAG, "onItemRangeInserted: " + i + ",," + i1);
+                            notifyItemRangeInserted(i, i1);
+                        }
+                    });
         }
 
         @Override
-        public void onItemRangeMoved(ObservableList<T> girls, int i, int i1, int i2) {
-            Log.d(TAG, "onItemRangeMoved: " + i + ",," + i1);
-            notifyItemMoved(i, i1);
+        public void onItemRangeMoved(ObservableList<T> girls, final int i, final int i1, int i2) {
+            Observable.just("onItemRangeMoved")
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            Log.d(TAG, "onItemRangeMoved: " + i + ",," + i1);
+                            notifyItemMoved(i, i1);
+                        }
+                    });
         }
 
         @Override
-        public void onItemRangeRemoved(ObservableList<T> girls, int i, int i1) {
-            Log.d(TAG, "onItemRangeRemoved: " + i + ",," + i1);
-            notifyItemRangeRemoved(i, i1);
+        public void onItemRangeRemoved(ObservableList<T> girls, final int i, final int i1) {
+            Observable.just("onItemRangeRemoved")
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            Log.d(TAG, "onItemRangeRemoved: " + i + ",," + i1);
+                            notifyItemRangeRemoved(i, i1);
+                        }
+                    });
         }
     };
 

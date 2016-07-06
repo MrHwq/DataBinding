@@ -4,7 +4,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 
 /**
  * Created by weiqiang on 2016/6/12.
@@ -90,7 +89,7 @@ public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener 
                 lastVisibleItemPosition = findMax(lastPositions);
                 break;
         }
-        Log.d(TAG, "onScrolled: " + dx + "..." + dy);
+//        Log.d(TAG, "onScrolled: " + dx + "..." + dy);
     }
 
     private int findMax(int[] lastPositions) {

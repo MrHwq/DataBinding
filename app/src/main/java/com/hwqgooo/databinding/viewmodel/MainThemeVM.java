@@ -8,14 +8,17 @@ import android.util.Log;
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.command.ReplyCommand;
+import com.hwqgooo.databinding.message.Messenger;
 
 import rx.functions.Action0;
+import rx.functions.Action1;
 
 /**
  * Created by weiqiang on 2016/7/3.
  */
 public class MainThemeVM extends BaseObservable implements IToolbarState {
     public final static String TAG = "MainThemeVM";
+    public static final String TOKEN_UPDATE_INDICATOR = "TOKEN_MainThemeVM";
     private Context context;
     private int selectColor;
     private int unselectColor;
@@ -32,6 +35,20 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
         unselectColor = context.getResources().getColor(R.color.colorAccent);
         appbarName = context.getResources().getStringArray(R.array.appbarname);
         toolbarTitle = appbarName[EXPANDED];
+        Messenger.getDefault().register(context,
+                TOKEN_UPDATE_INDICATOR,
+                String.class,
+                new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.d(TAG, "call: " + TOKEN_UPDATE_INDICATOR + "==>" + s);
+                        setToolbarImage(s);
+                    }
+                });
+    }
+
+    public void onDestory() {
+        Messenger.getDefault().unregister(context);
     }
 
     public static MainThemeVM getInstance(Context context) {

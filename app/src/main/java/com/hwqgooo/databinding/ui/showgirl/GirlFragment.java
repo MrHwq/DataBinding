@@ -5,21 +5,23 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
+import com.hwqgooo.databinding.ui.BaseFragment;
 import com.hwqgooo.databinding.viewmodel.GirlVM;
 
 /**
  * Created by weiqiang on 2016/7/2.
  */
-public class GirlFragment extends Fragment {
+public class GirlFragment extends BaseFragment {
     final static String TAG = "GirlFragment";
     FragmentGirlBinding binding;
     Context context;
@@ -38,7 +40,9 @@ public class GirlFragment extends Fragment {
     Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl,
                 container, false);
-        binding.setGirlvm(girlVm);
+        binding.setVariable(BR.girlvm, girlVm);
+        binding.executePendingBindings();
+//        binding.setGirlvm(girlVm);
         setRecylerView();
         setSwipeRefreshLayout();
         return binding.getRoot();
@@ -73,15 +77,15 @@ public class GirlFragment extends Fragment {
                 android.R.color.holo_orange_dark);
     }
 
-    boolean isload = false;
+    @Override
+    public void onViewDisappear() {
+
+    }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (!isload) {
-            isload = true;
-            girlVm.onRefresh.execute();
-        }
+    public void onViewFirstAppear() {
+        Log.d(TAG, "onViewFirstAppear: ");
+        girlVm.onRefresh.execute();
     }
 
     @Override

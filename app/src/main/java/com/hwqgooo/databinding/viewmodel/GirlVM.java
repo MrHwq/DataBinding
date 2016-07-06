@@ -7,11 +7,13 @@ import android.databinding.ObservableList;
 import android.util.Log;
 
 import com.hwqgooo.databinding.command.ReplyCommand;
+import com.hwqgooo.databinding.message.Messenger;
 import com.hwqgooo.databinding.model.IGirlService;
 import com.hwqgooo.databinding.model.bean.Girl;
 import com.hwqgooo.databinding.model.bean.GirlData;
 
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import retrofit2.Retrofit;
@@ -19,7 +21,6 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -67,12 +68,16 @@ public class GirlVM {
                         return girlData.getGirls();
                     }
                 })
-                .observeOn(AndroidSchedulers.mainThread())
+                .doAfterTerminate(new Action0() {
+                    @Override
+                    public void call() {
+                        isRefreshing.set(false);
+                    }
+                })
                 .subscribe(new Subscriber<List<Girl>>() {
                     @Override
                     public void onCompleted() {
                         Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onCompleted: ");
-                        isRefreshing.set(false);
                         page++;
                     }
 
@@ -81,22 +86,25 @@ public class GirlVM {
                         if (e instanceof SocketTimeoutException) {
                             Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onError: " +
                                     "SocketTimeoutException");
+                        } else if (e instanceof UnknownHostException) {
+                            Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onError: " +
+                                    "UnknownHostException");
                         } else {
+                            Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onError");
                             e.printStackTrace();
                         }
-                        isRefreshing.set(false);
                     }
 
                     @Override
                     public void onNext(List<Girl> girlList) {
+                        Log.d(TAG, "onNext: " + girlList.size());
                         if (isRefresh) {
                             girls.clear();
                         }
 
-                        MainThemeVM.getInstance(context)
-                                .setToolbarImage(girlList.get((int) (girlList.size() * Math
-                                        .random()))
-                                        .getUrl());
+                        Messenger.getDefault().send(
+                                girlList.get((int) (girlList.size() * Math.random())).getUrl(),
+                                MainThemeVM.TOKEN_UPDATE_INDICATOR);
                         int pos = girls.size();
                         girls.addAll(girlList);
                     }
