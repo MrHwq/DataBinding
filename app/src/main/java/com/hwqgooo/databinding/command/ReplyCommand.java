@@ -24,9 +24,9 @@ public class ReplyCommand<T> {
     }
 
     /**
-     *
-     * @param execute callback for event
-     * @param canExecute0 if this function return true the action execute would be invoked! otherwise would't invoked!
+     * @param execute     callback for event
+     * @param canExecute0 if this function return true the action execute would be invoked!
+     *                    otherwise would't invoked!
      */
     public ReplyCommand(Action0 execute, Func0<Boolean> canExecute0) {
         this.execute0 = execute;
@@ -34,9 +34,9 @@ public class ReplyCommand<T> {
     }
 
     /**
-     *
-     * @param execute callback for event,this callback need a params
-     * @param canExecute0 if this function return true the action execute would be invoked! otherwise would't invoked!
+     * @param execute     callback for event,this callback need a params
+     * @param canExecute0 if this function return true the action execute would be invoked!
+     *                    otherwise would't invoked!
      */
     public ReplyCommand(Action1<T> execute, Func0<Boolean> canExecute0) {
         this.execute1 = execute;

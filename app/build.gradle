@@ -51,4 +51,7 @@ dependencies {
 //    compile 'de.hdodenhof:circleimageview:2.0.0'
     /*打标签库*/
     compile 'me.gujun.android.taggroup:library:1.4@aar'
+    //
+    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter:1.2.0'
+    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter-recyclerview:1.2.0'
 }

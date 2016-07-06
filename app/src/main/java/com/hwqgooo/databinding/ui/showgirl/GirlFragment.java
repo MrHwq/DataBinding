@@ -43,26 +43,11 @@ public class GirlFragment extends BaseFragment {
         binding.setVariable(BR.girlvm, girlVm);
         binding.executePendingBindings();
 //        binding.setGirlvm(girlVm);
-        setRecylerView();
         setSwipeRefreshLayout();
         return binding.getRoot();
     }
 
-    private void setRecylerView() {
-        final GirlAdapter girlAdapter = new GirlAdapter(context, girlVm.getGirls());
-        binding.girlview.setAdapter(girlAdapter);
-        StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2,
-                StaggeredGridLayoutManager.VERTICAL);
-        binding.girlview.setLayoutManager(gridLayoutManager);
-//        binding.girllistview.addOnItemTouchListener(new BaseRecyclerViewListener<GirlAdapter
-//                .GirlHolder>
-//                (binding.girllistview) {
-//            @Override
-//            public void onItemClick(GirlAdapter.GirlHolder holder, int position) {
-//                Log.d("hwqhwq", "onItemClick: " + position);
-//            }
-//        });
-    }
+
 
     private void setSwipeRefreshLayout() {
         //设置首次运行进度条刷新

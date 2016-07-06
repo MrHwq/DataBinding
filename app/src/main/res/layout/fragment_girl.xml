@@ -5,24 +5,31 @@
 
     <data>
 
-        <import type="com.hwqgooo.databinding.viewmodel.GirlVM"/>
+        <import type="me.tatarka.bindingcollectionadapter.LayoutManagers"/>
+
+        <import type="android.support.v7.widget.StaggeredGridLayoutManager"/>
+
+        <import type="com.hwqgooo.databinding.ui.showgirl.GirlAdapter"/>
 
         <variable
             name="girlvm"
-            type="GirlVM"/>
+            type="com.hwqgooo.databinding.viewmodel.GirlVM"/>
     </data>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:onRefreshCommand="@{girlvm.onRefresh}"
-        app:isRefresh="@{girlvm.isRefreshing}">
+        app:isRefresh="@{girlvm.isRefreshing}"
+        app:onRefreshCommand="@{girlvm.onRefresh}">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/girlview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:adapter='@{"com.hwqgooo.databinding.ui.showgirl.GirlAdapter"}'
+            app:itemView="@{girlvm.itemView}"
+            app:items="@{girlvm.girls}"
+            app:layoutManager="@{LayoutManagers.staggeredGrid(2, StaggeredGridLayoutManager.VERTICAL)}"
             app:onLoadMoreCommand="@{girlvm.onLoadMore}"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 </layout>

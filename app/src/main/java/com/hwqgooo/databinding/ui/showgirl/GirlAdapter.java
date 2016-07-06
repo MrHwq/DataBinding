@@ -1,68 +1,42 @@
 package com.hwqgooo.databinding.ui.showgirl;
 
-import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.databinding.ObservableList;
+import android.databinding.ViewDataBinding;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.hwqgooo.databinding.BR;
-import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.model.bean.Girl;
-import com.hwqgooo.databinding.utils.recyclerview.BaseRecyclerViewAdapter;
-import com.hwqgooo.databinding.utils.recyclerview.ViewHolderInject;
+
+import me.tatarka.bindingcollectionadapter.BindingRecyclerViewAdapter;
+import me.tatarka.bindingcollectionadapter.ItemViewArg;
 
 /**
- * Created by weiqiang on 2016/7/4.
+ * Created by weiqiang on 2016/7/6.
+ * 主要是为了自定义修改ImageView的尺寸，不然可不需要实现这个类
  */
-public class GirlAdapter extends BaseRecyclerViewAdapter<Girl> {
-    public GirlAdapter(Context context) {
-        super(context);
-    }
+public class GirlAdapter extends BindingRecyclerViewAdapter<Girl> {
+    public static final String TAG = "GirlAdapter";
 
-    public GirlAdapter(Context context, ObservableList<Girl> data) {
-        super(context, data);
+    public GirlAdapter(@NonNull ItemViewArg<Girl> arg) {
+        super(arg);
     }
 
     @Override
-    public ViewHolderInject<Girl> getNewHolder(LayoutInflater layoutInflater, ViewGroup parent,
-                                               int viewType) {
-        ItemGirlBinding binding = DataBindingUtil.inflate(
-                LayoutInflater.from(parent.getContext()),
-                R.layout.item_girl,
-                parent,
-                false);
-        GirlHolder holder = new GirlHolder(binding.getRoot());
-        holder.setBinding(binding);
-        return holder;
-    }
-
-    public class GirlHolder extends ViewHolderInject<Girl> {
-        ItemGirlBinding binding;
-
-        public GirlHolder(View itemView) {
-            super(itemView);
+    public ViewDataBinding onCreateBinding(LayoutInflater inflater, @LayoutRes int layoutId,
+                                           ViewGroup viewGroup) {
+        ItemGirlBinding binding = (ItemGirlBinding) super.onCreateBinding(inflater, layoutId,
+                viewGroup);
+        ViewGroup.LayoutParams params = binding.girliv.getLayoutParams();
+        int widthPixels = binding.girliv.getContext().getResources().getDisplayMetrics()
+                .widthPixels;
+        float scale = (float) (Math.random() + 1);
+        while (scale > 1.6 || scale < 1.1) {
+            scale = (float) (Math.random() + 1);
         }
-
-        public void setBinding(ItemGirlBinding binding) {
-            this.binding = binding;
-        }
-
-        @Override
-        public void loadData(Girl data, int position) {
-//            binding.setGirl(data);
-            ViewGroup.LayoutParams params = binding.girliv.getLayoutParams();
-            int widthPixels = context.getResources().getDisplayMetrics().widthPixels;
-            float scale = (float) (Math.random() + 1);
-            while(scale>1.6||scale<1.1){
-                scale = (float) (Math.random() + 1);
-            }
-            params.height = (int) (widthPixels * scale * 0.448);
-            binding.girliv.setLayoutParams(params);
-            binding.setVariable(BR.girl, data);
-            binding.executePendingBindings();
-        }
+        params.height = (int) (widthPixels * scale * 0.448);
+        binding.girliv.setLayoutParams(params);
+        return binding;
     }
 }

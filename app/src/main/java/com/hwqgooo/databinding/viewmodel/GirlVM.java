@@ -6,6 +6,8 @@ import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
 import android.util.Log;
 
+import com.hwqgooo.databinding.BR;
+import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.message.Messenger;
 import com.hwqgooo.databinding.model.IGirlService;
@@ -16,11 +18,13 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import me.tatarka.bindingcollectionadapter.ItemView;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -33,6 +37,7 @@ public class GirlVM {
     public static final String TAG = "GirlVM";
     private ObservableList<Girl> girls = new ObservableArrayList<>();
     public ObservableBoolean isRefreshing = new ObservableBoolean(false);
+    public final ItemView itemView = ItemView.of(BR.girl, R.layout.item_girl);
 
     final String baseUrl = "http://gank.io/api/";
     Retrofit mRetrofit;
@@ -51,6 +56,12 @@ public class GirlVM {
         girlService = mRetrofit.create(IGirlService.class);
         compositeSubscription = new CompositeSubscription();
         this.context = context;
+//        Girl.request_width = context.getResources().getDisplayMetrics().widthPixels;
+//        float scale = (float) (Math.random() + 1);
+//        while (scale > 1.6 || scale < 1.1) {
+//            scale = (float) (Math.random() + 1);
+//        }
+//        Girl.request_height = (int) (Girl.request_width * scale * 0.448);
     }
 
     public void onDestory() {
@@ -74,6 +85,7 @@ public class GirlVM {
                         isRefreshing.set(false);
                     }
                 })
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Girl>>() {
                     @Override
                     public void onCompleted() {
@@ -97,16 +109,20 @@ public class GirlVM {
 
                     @Override
                     public void onNext(List<Girl> girlList) {
-                        Log.d(TAG, "onNext: " + girlList.size());
-                        if (isRefresh) {
-                            girls.clear();
-                        }
+                        try {
+                            Log.d(TAG, "onNext: " + girlList.size());
+                            if (isRefresh) {
+                                girls.clear();
+                            }
 
-                        Messenger.getDefault().send(
-                                girlList.get((int) (girlList.size() * Math.random())).getUrl(),
-                                MainThemeVM.TOKEN_UPDATE_INDICATOR);
-                        int pos = girls.size();
-                        girls.addAll(girlList);
+                            Messenger.getDefault().send(
+                                    girlList.get((int) (girlList.size() * Math.random())).getUrl(),
+                                    MainThemeVM.TOKEN_UPDATE_INDICATOR);
+                            int pos = girls.size();
+                            girls.addAll(girlList);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }));
     }

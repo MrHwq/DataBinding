@@ -13,6 +13,22 @@ import com.hwqgooo.databinding.utils.recyclerview.OnRcvScrollListener;
 public class ViewBindingAdapter {
     public static final String TAG = "RcvViewBindingAdapter";
 
+
+//    @BindingAdapter({"itemView", "viewModels"})
+//    public static void addViews(ViewGroup viewGroup,
+//                                final ItemView itemView,
+//                                final ObservableList<ViewModel> viewModelList) {
+//        if (viewModelList != null && !viewModelList.isEmpty()) {
+//            viewGroup.removeAllViews();
+//            for (ViewModel viewModel : viewModelList) {
+//                ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(viewGroup
+//                                .getContext()),
+//                        itemView.layoutRes(), viewGroup, true);
+//                binding.setVariable(itemView.bindingVariable(), viewModel);
+//            }
+//        }
+//    }
+
     @BindingAdapter({"onLoadMoreCommand"})
     public static void onLoadMoreCommand(RecyclerView recyclerView, final ReplyCommand
             onLoadMoreCommand) {
@@ -30,5 +46,13 @@ public class ViewBindingAdapter {
                 return 6;
             }
         });
+    }
+
+
+    @BindingAdapter(value = {"onItemClickCommand"}, requireAll = false)
+    public static void onItemClickCommand(final RecyclerView recyclerView, final ReplyCommand
+            onItemClickCommand) {
+
+
     }
 }
