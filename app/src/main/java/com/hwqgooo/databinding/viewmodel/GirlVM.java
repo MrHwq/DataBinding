@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
+import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.message.Messenger;
 import com.hwqgooo.databinding.model.IGirlService;
@@ -18,7 +19,6 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import me.tatarka.bindingcollectionadapter.ItemView;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -26,6 +26,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -44,8 +45,6 @@ public class GirlVM {
     IGirlService girlService;
     CompositeSubscription compositeSubscription;
 
-    int count = 0;
-    Context context;
 
     public GirlVM(Context context) {
         mRetrofit = new Retrofit.Builder()
@@ -55,7 +54,6 @@ public class GirlVM {
                 .build();
         girlService = mRetrofit.create(IGirlService.class);
         compositeSubscription = new CompositeSubscription();
-        this.context = context;
 //        Girl.request_width = context.getResources().getDisplayMetrics().widthPixels;
 //        float scale = (float) (Math.random() + 1);
 //        while (scale > 1.6 || scale < 1.1) {
@@ -154,6 +152,15 @@ public class GirlVM {
             page = 1;
             Log.d(TAG, "call: onRefresh " + page);
             load(true);
+        }
+    });
+
+    public final ReplyCommand<Integer> onItemClick = new ReplyCommand<Integer>(new Action1<Integer>() {
+        @Override
+        public void call(Integer integer) {
+            Log.d(TAG, "call: " + integer);
+            Log.d(TAG, "call: " + girls.get(integer).getDesc());
+            Log.d(TAG, "call: " + girls.get(integer).getUrl());
         }
     });
 }

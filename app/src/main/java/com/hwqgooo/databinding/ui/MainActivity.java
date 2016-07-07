@@ -30,6 +30,21 @@ public class MainActivity extends AppCompatActivity {
         initTab();
     }
 
+    void initTab() {
+        final List<Fragment> lists = new LinkedList<>();
+        lists.add(new GirlFragment());
+
+        TabsPagerAdapter tabs = new TabsPagerAdapter(getSupportFragmentManager(), lists);
+        binding.viewpager.setAdapter(tabs);
+        binding.tablayout.setupWithViewPager(binding.viewpager);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MainThemeVM.getInstance(this).onDestory();
+    }
+
     /* 传递vm applayout折叠展开状态*/
     class OnMyOffsetChangedListener implements AppBarLayout.OnOffsetChangedListener {
         @Override
@@ -52,20 +67,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    void initTab() {
-        final List<Fragment> lists = new LinkedList<>();
-        lists.add(new GirlFragment());
-
-        TabsPagerAdapter tabs = new TabsPagerAdapter(getSupportFragmentManager(), lists);
-        binding.viewpager.setAdapter(tabs);
-        binding.tablayout.setupWithViewPager(binding.viewpager);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        MainThemeVM.getInstance(this).onDestory();
     }
 }

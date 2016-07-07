@@ -6,11 +6,10 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.hwqgooo.databinding.bindingcollectionadapter.BindingRecyclerViewAdapter;
+import com.hwqgooo.databinding.bindingcollectionadapter.ItemViewArg;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.model.bean.Girl;
-
-import me.tatarka.bindingcollectionadapter.BindingRecyclerViewAdapter;
-import me.tatarka.bindingcollectionadapter.ItemViewArg;
 
 /**
  * Created by weiqiang on 2016/7/6.

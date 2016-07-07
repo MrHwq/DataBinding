@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.ui;
+package com.hwqgooo.databinding.ui.fragment;
 
 import android.support.v4.app.Fragment;
 
@@ -9,37 +9,9 @@ public abstract class BaseFragment extends Fragment {
     private boolean isLayoutUpdating = false;
     private boolean isViewFirstAppear = true;
 
-    public abstract void onViewDisappear();
-
-    public abstract void onViewFirstAppear();
-
     protected boolean isLayoutUpdating() {
         return this.isLayoutUpdating;
     }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        onViewDisappear();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getUserVisibleHint()) {
-            onViewAppear();
-            return;
-        }
-        onViewDisappear();
-    }
-
-    public void onViewAppear() {
-        if (this.isViewFirstAppear) {
-            onViewFirstAppear();
-            this.isViewFirstAppear = false;
-        }
-    }
-
 
     public void setLayoutUpdating(boolean paramBoolean) {
         this.isLayoutUpdating = paramBoolean;
@@ -57,4 +29,31 @@ public abstract class BaseFragment extends Fragment {
         }
         onViewDisappear();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getUserVisibleHint()) {
+            onViewAppear();
+            return;
+        }
+        onViewDisappear();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        onViewDisappear();
+    }
+
+    public abstract void onViewDisappear();
+
+    public void onViewAppear() {
+        if (this.isViewFirstAppear) {
+            onViewFirstAppear();
+            this.isViewFirstAppear = false;
+        }
+    }
+
+    public abstract void onViewFirstAppear();
 }

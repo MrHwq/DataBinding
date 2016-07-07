@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter.LayoutManagers"/>
+        <import type="com.hwqgooo.databinding.bindingcollectionadapter.LayoutManagers"/>
 
         <import type="android.support.v7.widget.StaggeredGridLayoutManager"/>
 
@@ -24,6 +24,7 @@
         app:onRefreshCommand="@{girlvm.onRefresh}">
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/girlView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:adapter='@{"com.hwqgooo.databinding.ui.showgirl.GirlAdapter"}'
@@ -31,5 +32,6 @@
             app:items="@{girlvm.girls}"
             app:layoutManager="@{LayoutManagers.staggeredGrid(2, StaggeredGridLayoutManager.VERTICAL)}"
             app:onLoadMoreCommand="@{girlvm.onLoadMore}"/>
+        <!--app:onItemClickCommand="@{girlvm.onItemClick}"-->
     </android.support.v4.widget.SwipeRefreshLayout>
 </layout>
