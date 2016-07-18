@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.ui.fragment;
+package com.hwqgooo.databinding.ui.showgirlphoto;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;

@@ -3,6 +3,8 @@ package com.hwqgooo.databinding.viewmodel;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import android.graphics.Bitmap;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
 
 import com.hwqgooo.databinding.BR;
@@ -10,8 +12,11 @@ import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.message.Messenger;
 
+import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by weiqiang on 2016/7/3.
@@ -19,15 +24,54 @@ import rx.functions.Action1;
 public class MainThemeVM extends BaseObservable implements IToolbarState {
     public final static String TAG = "MainThemeVM";
     public static final String TOKEN_UPDATE_INDICATOR = "TOKEN_MainThemeVM";
+    static MainThemeVM instance;
+    public final ReplyCommand onClick = new ReplyCommand(new Action0() {
+        @Override
+        public void call() {
+            Log.d(TAG, "call: imageview onClick");
+        }
+    });
+    public String toolbarImage;
     private Context context;
     private int selectColor;
+    public final ReplyCommand<Bitmap> onSuccess = new ReplyCommand<Bitmap>(new Action1<Bitmap>() {
+        @Override
+        public void call(Bitmap bitmap) {
+            Observable.just(bitmap)
+                    .map(new Func1<Bitmap, Palette.Swatch>() {
+                        @Override
+                        public Palette.Swatch call(Bitmap bitmap) {
+                            Palette palette = Palette.from(bitmap).generate();
+                            if (palette != null && palette.getMutedSwatch() != null) {
+                                return palette.getMutedSwatch();
+                            }
+                            return null;
+                        }
+                    })
+                    .subscribe(new Subscriber<Palette.Swatch>() {
+                        @Override
+                        public void onCompleted() {
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+
+                        }
+
+                        @Override
+                        public void onNext(Palette.Swatch swatch) {
+                            if (swatch != null) {
+                                setSelectColor(swatch.getRgb());
+                            }
+                        }
+                    });
+        }
+    });
     private int unselectColor;
     private int toolbalState = -1;
     private String toolbarTitle;
-    public String toolbarImage;
     private String[] appbarName;
-
-    static MainThemeVM instance;
 
     private MainThemeVM(Context context) {
         this.context = context;
@@ -47,15 +91,15 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
                 });
     }
 
-    public void onDestory() {
-        Messenger.getDefault().unregister(context);
-    }
-
     public static MainThemeVM getInstance(Context context) {
         if (instance == null) {
             instance = new MainThemeVM(context);
         }
         return instance;
+    }
+
+    public void onDestory() {
+        Messenger.getDefault().unregister(context);
     }
 
     @Bindable
@@ -91,15 +135,7 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
     @Bindable
     public String getToolbarImage() {
         return toolbarImage;
-    }
-
-    public void setToolbarImage(String toolbarImage) {
-        this.toolbarImage = toolbarImage;
-        notifyPropertyChanged(BR.toolbarImage);
-        Log.d(TAG, "setToolbarImage: " + toolbarImage);
-    }
-
-    @Override
+    }    @Override
     public void setToolbarState(int state) {
         this.toolbalState = state;
         if (state == EXPANDED) {
@@ -113,15 +149,16 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
         }
     }
 
-    @Override
+    public void setToolbarImage(String toolbarImage) {
+        this.toolbarImage = toolbarImage;
+        notifyPropertyChanged(BR.toolbarImage);
+        Log.d(TAG, "setToolbarImage: " + toolbarImage);
+    }    @Override
     public int getToolbarState() {
         return toolbalState;
     }
 
-    public final ReplyCommand onClick = new ReplyCommand(new Action0() {
-        @Override
-        public void call() {
-            Log.d(TAG, "call: imageview onClick");
-        }
-    });
+
+
+
 }

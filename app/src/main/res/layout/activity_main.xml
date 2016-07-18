@@ -24,7 +24,8 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        app:statusbarcolor="@{mainthemevm.selectColor}">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
@@ -51,6 +52,7 @@
                     android:scaleType="centerCrop"
                     app:clickCommand="@{mainthemevm.onClick}"
                     app:layout_collapseMode="parallax"
+                    app:onSuccessCommand="@{mainthemevm.onSuccess}"
                     app:uri="@{mainthemevm.toolbarImage}"/>
 
                 <android.support.v7.widget.Toolbar
@@ -67,8 +69,9 @@
                 <android.support.design.widget.TabLayout
                     android:id="@+id/tablayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"/>
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_gravity="bottom"
+                    android:background="@{mainthemevm.selectColor}"/>
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 
@@ -78,6 +81,21 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/content_bar"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+        <!--<com.etiennelawlor.discreteslider.library.ui.DiscreteSlider-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="64dp"-->
+        <!--android:layout_gravity="bottom"-->
+        <!--android:background="@color/colorPrimary"-->
+        <!--android:paddingLeft="8dp"-->
+        <!--android:paddingRight="8dp"-->
+        <!--app:backdropFillColor="@color/colorAccent"-->
+        <!--app:backdropStrokeColor="@color/colorPrimaryDark"-->
+        <!--app:backdropStrokeWidth="1dp"-->
+        <!--app:horizontalBarThickness="4dp"-->
+        <!--app:thumb="@mipmap/ic_launcher"-->
+        <!--app:tickMarkCount="3"-->
+        <!--app:tickMarkRadius="8dp"/>-->
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

@@ -12,26 +12,26 @@
         <import type="com.hwqgooo.databinding.ui.showgirl.GirlAdapter"/>
 
         <variable
-            name="girlvm"
-            type="com.hwqgooo.databinding.viewmodel.GirlVM"/>
+            name="basegirlvm"
+            type="com.hwqgooo.databinding.viewmodel.BaseGirlVM"/>
     </data>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:isRefresh="@{girlvm.isRefreshing}"
-        app:onRefreshCommand="@{girlvm.onRefresh}">
+        app:isRefresh="@{basegirlvm.isRefreshing}"
+        app:onRefreshCommand="@{basegirlvm.onRefresh}">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/girlView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:adapter='@{"com.hwqgooo.databinding.ui.showgirl.GirlAdapter"}'
-            app:itemView="@{girlvm.itemView}"
-            app:items="@{girlvm.girls}"
+            app:itemView="@{basegirlvm.itemView}"
+            app:items="@{basegirlvm.girls}"
             app:layoutManager="@{LayoutManagers.staggeredGrid(2, StaggeredGridLayoutManager.VERTICAL)}"
-            app:onLoadMoreCommand="@{girlvm.onLoadMore}"/>
-        <!--app:onItemClickCommand="@{girlvm.onItemClick}"-->
+            app:onItemClickCommand="@{basegirlvm.onItemClick}"
+            app:onLoadMoreCommand="@{basegirlvm.onLoadMore}"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 </layout>

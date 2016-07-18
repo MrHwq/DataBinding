@@ -30,6 +30,7 @@
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
+                android:transitionName="@{girl.desc}"
                 app:uri="@{girl.url}"/>
 
             <LinearLayout

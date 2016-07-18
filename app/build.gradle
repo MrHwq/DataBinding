@@ -11,7 +11,8 @@ android {
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "${getGitVersion()}"
+        buildConfigField "String", "GIT_REVISION", "\"${getGitVersion()}\""
     }
 
     compileOptions {
@@ -25,11 +26,41 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+//        develop {}
+        xiaomi {}
+//        huawei {}
+//        anzhi {}
+    }
+    //修改生成的apk名字
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def oldFile = output.outputFile
+//            if (variant.buildType.name.equals('release')) {
+            def releaseApkName = 'girl.' + variant.productFlavors[0].name + "." + defaultConfig.versionName + ".${getReleaseApkName()}" + '.apk'
+            output.outputFile = new File(oldFile.parent, releaseApkName)
+//            }
+        }
+    }
+}
 
+
+def getReleaseApkName() {
+    return "${releaseTime()}"
+}
+
+
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+def getGitVersion() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('libs/jsoup-1.9.1.jar')
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:cardview-v7:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
@@ -51,6 +82,7 @@ dependencies {
 //    compile 'de.hdodenhof:circleimageview:2.0.0'
     /*打标签库*/
     compile 'me.gujun.android.taggroup:library:1.4@aar'
+    compile 'com.github.lawloretienne:discreteslider:0.0.6'
     //
 //    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter:1.2.0'
 //    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter-recyclerview:1.2.0'

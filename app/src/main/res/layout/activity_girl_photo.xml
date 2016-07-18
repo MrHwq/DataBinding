@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.hwqgooo.databinding.viewmodel.MainThemeVM"/>
+
+        <variable
+            name="mainthemevm"
+            type="MainThemeVM"/>
+
+        <import type="com.hwqgooo.databinding.model.bean.Girl"/>
+
+        <variable
+            name="girl"
+            type="Girl"/>
+    </data>
+
+    <!--<LinearLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:orientation="vertical"-->
+    <!--app:statusbarcolor="@{mainthemevm.selectColor}">-->
+
+    <!--<android.support.v4.view.ViewPager-->
+    <!--android:id="@+id/viewpager"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"/>-->
+    <!--</LinearLayout>-->
+
+
+    <ImageView
+        android:id="@+id/iv_fr_girl"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:fitsSystemWindows="true"
+        android:scaleType="fitXY"
+        android:transitionName="@{girl.desc}"
+        app:statusbarcolor="@{mainthemevm.selectColor}"
+        app:uri="@{girl.url}"/>
+</layout>

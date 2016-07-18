@@ -19,7 +19,7 @@ public abstract class OnRcvClickListener implements
             public boolean onSingleTapUp(MotionEvent e) {
                 View childView = recyclerView.findChildViewUnder(e.getX(), e.getY());
                 if (childView != null) {
-                    onItemClick((int) recyclerView.getChildLayoutPosition(childView));
+                    onItemClick(childView, (int) recyclerView.getChildLayoutPosition(childView));
                 }
                 return true;
             }
@@ -31,10 +31,15 @@ public abstract class OnRcvClickListener implements
                 View childView = recyclerView.findChildViewUnder(e.getX(), e.getY());
                 // 有item被选则且监听器不为空触发长按事件
                 if (childView != null) {
-                    onItemLongClick(recyclerView.getChildLayoutPosition(childView));
+                    onItemLongClick(childView, recyclerView.getChildLayoutPosition(childView));
                 }
             }
         });
+    }
+
+    public abstract void onItemClick(View childView, int position);
+
+    public void onItemLongClick(View childView, int position) {
     }
 
     @Override
@@ -50,10 +55,5 @@ public abstract class OnRcvClickListener implements
 
     @Override
     public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-    }
-
-    public abstract void onItemClick(int position);
-
-    public void onItemLongClick(int position) {
     }
 }

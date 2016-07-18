@@ -32,6 +32,16 @@ public class WeakAction<T> {
         }
     }
 
+    public boolean isLive() {
+        if (reference == null) {
+            return false;
+        }
+        if (reference.get() == null) {
+            return false;
+        }
+        return true;
+    }
+
     public void execute(T parameter) {
         if (action1 != null
                 && isLive()) {
@@ -53,17 +63,6 @@ public class WeakAction<T> {
     public Action1 getAction1() {
         return action1;
     }
-
-    public boolean isLive() {
-        if (reference == null) {
-            return false;
-        }
-        if (reference.get() == null) {
-            return false;
-        }
-        return true;
-    }
-
 
     public Object getTarget() {
         if (reference != null) {

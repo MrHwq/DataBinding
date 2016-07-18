@@ -6,16 +6,7 @@ import android.support.v4.app.Fragment;
  * Created by weiqiang on 2016/7/6.
  */
 public abstract class BaseFragment extends Fragment {
-    private boolean isLayoutUpdating = false;
     private boolean isViewFirstAppear = true;
-
-    protected boolean isLayoutUpdating() {
-        return this.isLayoutUpdating;
-    }
-
-    public void setLayoutUpdating(boolean paramBoolean) {
-        this.isLayoutUpdating = paramBoolean;
-    }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -46,8 +37,6 @@ public abstract class BaseFragment extends Fragment {
         onViewDisappear();
     }
 
-    public abstract void onViewDisappear();
-
     public void onViewAppear() {
         if (this.isViewFirstAppear) {
             onViewFirstAppear();
@@ -55,5 +44,11 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    public abstract void onViewDisappear();
+
     public abstract void onViewFirstAppear();
+
+    public abstract String getTitle();
+
+    public abstract void setTitle(String title);
 }

@@ -18,5 +18,6 @@
         android:layout_height="fill_parent"
         android:adjustViewBounds="true"
         android:scaleType="fitXY"
+        android:transitionName="@{girl.desc}"
         app:uri="@{girl.url}"/>
 </layout>

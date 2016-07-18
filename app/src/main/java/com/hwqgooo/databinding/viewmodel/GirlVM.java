@@ -1,9 +1,6 @@
 package com.hwqgooo.databinding.viewmodel;
 
 import android.content.Context;
-import android.databinding.ObservableArrayList;
-import android.databinding.ObservableBoolean;
-import android.databinding.ObservableList;
 import android.util.Log;
 
 import com.hwqgooo.databinding.BR;
@@ -11,9 +8,9 @@ import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.message.Messenger;
-import com.hwqgooo.databinding.model.IGirlService;
 import com.hwqgooo.databinding.model.bean.Girl;
 import com.hwqgooo.databinding.model.bean.GirlData;
+import com.hwqgooo.databinding.model.showgirl.IGirlService;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -34,17 +31,13 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by weiqiang on 2016/7/4.
  */
-public class GirlVM {
+public class GirlVM extends BaseGirlVM {
     public static final String TAG = "GirlVM";
-    private ObservableList<Girl> girls = new ObservableArrayList<>();
-    public ObservableBoolean isRefreshing = new ObservableBoolean(false);
-    public final ItemView itemView = ItemView.of(BR.girl, R.layout.item_girl);
-
     final String baseUrl = "http://gank.io/api/";
     Retrofit mRetrofit;
     IGirlService girlService;
     CompositeSubscription compositeSubscription;
-
+    int page;
 
     public GirlVM(Context context) {
         mRetrofit = new Retrofit.Builder()
@@ -60,10 +53,38 @@ public class GirlVM {
 //            scale = (float) (Math.random() + 1);
 //        }
 //        Girl.request_height = (int) (Girl.request_width * scale * 0.448);
-    }
-
-    public void onDestory() {
-        compositeSubscription.unsubscribe();
+        itemView = ItemView.of(BR.girl, R.layout.item_girl);
+        onRefresh = new ReplyCommand(new Action0() {
+            @Override
+            public void call() {
+                if (isRefreshing.get()) {
+                    Log.d(TAG, "call: onRefresh is refreshing");
+                    return;
+                }
+                page = 1;
+                Log.d(TAG, "call: onRefresh " + page);
+                load(true);
+            }
+        });
+        onLoadMore = new ReplyCommand(new Action0() {
+            @Override
+            public void call() {
+                if (isRefreshing.get()) {
+                    Log.d(TAG, "call: onLoadMore is refreshing");
+                    return;
+                }
+                Log.d(TAG, "call: onLoadMore " + page);
+                load(false);
+            }
+        });
+        onItemClick = new ReplyCommand<Integer>(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                Log.d(TAG, "call: " + integer);
+                Log.d(TAG, "call: " + girls.get(integer).getDesc());
+                Log.d(TAG, "call: " + girls.get(integer).getUrl());
+            }
+        });
     }
 
     private void load(final boolean isRefresh) {
@@ -125,42 +146,8 @@ public class GirlVM {
                 }));
     }
 
-    public final ReplyCommand onLoadMore = new ReplyCommand(new Action0() {
-        @Override
-        public void call() {
-            if (isRefreshing.get()) {
-                Log.d(TAG, "call: onLoadMore is refreshing");
-                return;
-            }
-            Log.d(TAG, "call: onLoadMore " + page);
-            load(false);
-        }
-    });
-
-    public ObservableList<Girl> getGirls() {
-        return girls;
+    @Override
+    public void onDestory() {
+        compositeSubscription.unsubscribe();
     }
-
-    int page;
-    public final ReplyCommand onRefresh = new ReplyCommand(new Action0() {
-        @Override
-        public void call() {
-            if (isRefreshing.get()) {
-                Log.d(TAG, "call: onRefresh is refreshing");
-                return;
-            }
-            page = 1;
-            Log.d(TAG, "call: onRefresh " + page);
-            load(true);
-        }
-    });
-
-    public final ReplyCommand<Integer> onItemClick = new ReplyCommand<Integer>(new Action1<Integer>() {
-        @Override
-        public void call(Integer integer) {
-            Log.d(TAG, "call: " + integer);
-            Log.d(TAG, "call: " + girls.get(integer).getDesc());
-            Log.d(TAG, "call: " + girls.get(integer).getUrl());
-        }
-    });
 }

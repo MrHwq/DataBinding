@@ -3,6 +3,7 @@ package com.hwqgooo.databinding.command.recyclerview;
 import android.databinding.BindingAdapter;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
@@ -49,14 +50,13 @@ public class ViewBindingAdapter {
         });
     }
 
-
     @BindingAdapter(value = {"onItemClickCommand"}, requireAll = false)
     public static void onItemClickCommand(final RecyclerView recyclerView,
                                           final ReplyCommand<Integer> onItemClickCommand) {
 
         recyclerView.addOnItemTouchListener(new OnRcvClickListener(recyclerView) {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(View childView, int position) {
                 if (onItemClickCommand != null) {
                     onItemClickCommand.execute(position);
                 }

@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.model;
+package com.hwqgooo.databinding.model.showgirl;
 
 
 import com.hwqgooo.databinding.model.bean.GirlData;

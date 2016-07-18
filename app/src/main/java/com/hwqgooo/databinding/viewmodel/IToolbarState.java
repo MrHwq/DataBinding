@@ -8,7 +8,7 @@ public interface IToolbarState {
     int COLLAPSED = 1;
     int INTERNEDIATE = 2;
 
-    void setToolbarState(int state);
-
     int getToolbarState();
+
+    void setToolbarState(int state);
 }
