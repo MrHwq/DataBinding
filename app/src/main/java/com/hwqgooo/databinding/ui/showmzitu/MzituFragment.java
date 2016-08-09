@@ -2,8 +2,10 @@ package com.hwqgooo.databinding.ui.showmzitu;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -12,7 +14,9 @@ import android.view.ViewGroup;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
+import com.hwqgooo.databinding.bindingcollectionadapter.BindingRecyclerViewAdapter;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
+import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
 import com.hwqgooo.databinding.ui.showgirlphoto.GirlPhotoActivity;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
@@ -61,9 +65,10 @@ public class MzituFragment extends BaseFragment {
     }
 
     private void setRecyclerView() {
-        binding.girlView.addOnItemTouchListener(new OnRcvClickListener(binding.girlView) {
-            @Override
-            public void onItemClick(View childView, int position) {
+        binding.girlView.addOnItemTouchListener(
+                new OnRcvClickListener(binding.girlView) {
+                    @Override
+                    public void onItemClick(RecyclerView.ViewHolder viewHolder, int position) {
 //                GirlPhotoFragment fragment = new GirlPhotoFragment();
 //                Bundle bundle = new Bundle();
 //                bundle.putParcelable("girl", mzituVM.getGirls().get(position));
@@ -71,14 +76,17 @@ public class MzituFragment extends BaseFragment {
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-                View iv = childView.findViewById(R.id.girliv);
-                if (iv == null) {
-                    iv = childView;
+
+                        BindingRecyclerViewAdapter.ViewHolder
+                                newViewHolder = (BindingRecyclerViewAdapter.ViewHolder) viewHolder;
+                        ViewDataBinding binding = newViewHolder.binding;
+                        ItemGirlBinding girlBind = (ItemGirlBinding) binding;
+                        GirlPhotoActivity.launch(context, girlBind.girliv, position,
+                                mzituVM.getGirls().get(position));
+                    }
                 }
-                GirlPhotoActivity.launch(context, iv, position,
-                        mzituVM.getGirls().get(position));
-            }
-        });
+
+        );
     }
 
     @Override

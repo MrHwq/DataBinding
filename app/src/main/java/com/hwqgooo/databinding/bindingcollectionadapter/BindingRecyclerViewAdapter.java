@@ -187,7 +187,7 @@ public class BindingRecyclerViewAdapter<T> extends RecyclerView
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        final ViewDataBinding binding;
+        final public ViewDataBinding binding;
 
         ViewHolder(ViewDataBinding binding) {
             super(binding.getRoot());
