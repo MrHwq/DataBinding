@@ -22,12 +22,12 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by weiqiang on 2016/7/4.
@@ -37,10 +37,20 @@ public class GirlVM extends BaseGirlVM {
     final String baseUrl = "http://gank.io/api/";
     Retrofit mRetrofit;
     IGirlService girlService;
-    CompositeSubscription compositeSubscription;
+    Subscription subscription;
     int page;
+    Context context;
+    static GirlVM girlVM;
 
-    public GirlVM(Context context) {
+    public static GirlVM getInstance(Context context) {
+        if (girlVM == null) {
+            girlVM = new GirlVM(context);
+        }
+        return girlVM;
+    }
+
+    private GirlVM(Context context) {
+        this.context = context;
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(CacheHttpClient.getOkHttpClient(context))
@@ -48,7 +58,6 @@ public class GirlVM extends BaseGirlVM {
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
         girlService = mRetrofit.create(IGirlService.class);
-        compositeSubscription = new CompositeSubscription();
 //        Girl.request_width = context.getResources().getDisplayMetrics().widthPixels;
 //        float scale = (float) (Math.random() + 1);
 //        while (scale > 1.6 || scale < 1.1) {
@@ -89,10 +98,50 @@ public class GirlVM extends BaseGirlVM {
         });
     }
 
+    @Override
+    public void onStart() {
+        if (girls.isEmpty()) {
+            load(true);
+        }
+    }
+
+    @Override
+    public void onDestory() {
+        if (subscription != null && subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+        girls.clear();
+        girlVM = null;
+    }
+
+    @Override
+    public void onStop() {
+        if (subscription != null && subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+    }
+
+    @Override
+    public void onRestart(Context context) {
+        if (this.context == context) {
+            return;
+        }
+        mRetrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(CacheHttpClient.getOkHttpClient(context))
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+        girlService = mRetrofit.create(IGirlService.class);
+    }
+
     private void load(final boolean isRefresh) {
+        Log.d(TAG, "load: " + isRefresh);
         isRefreshing.set(true);
         final Observable<GirlData> observable = girlService.getGirls(page);
-        compositeSubscription.add(observable
+        subscription = observable
                 .subscribeOn(Schedulers.io())
                 .map(new Func1<GirlData, List<Girl>>() {
                     @Override
@@ -139,17 +188,12 @@ public class GirlVM extends BaseGirlVM {
                             Messenger.getDefault().send(
                                     girlList.get((int) (girlList.size() * Math.random())).getUrl(),
                                     MainThemeVM.TOKEN_UPDATE_INDICATOR);
-                            int pos = girls.size();
+//                            int pos = girls.size();
                             girls.addAll(girlList);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                }));
-    }
-
-    @Override
-    public void onDestory() {
-        compositeSubscription.unsubscribe();
+                });
     }
 }

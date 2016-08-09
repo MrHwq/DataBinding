@@ -1,12 +1,9 @@
 package com.hwqgooo.databinding.ui.showmzitu;
 
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -41,14 +38,11 @@ public class MzituFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
     Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl,
-                container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl, container, false);
         Bundle argument = getArguments();
         title = argument.getString("title");
-        if (mzituVM == null) {
-            mzituVM = new MzituVM(context, title);
-            TAG = TAG + title;
-        }
+        TAG = TAG + title;
+        mzituVM = MzituVM.getInstance(context, title);
         Log.d(TAG, "onCreateView: " + title);
         binding.setVariable(BR.basegirlvm, mzituVM);
         binding.executePendingBindings();
@@ -77,22 +71,12 @@ public class MzituFragment extends BaseFragment {
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-                final Intent intent = new Intent(context, GirlPhotoActivity.class);
-                intent.putExtra("index", position);
-                intent.putExtra("girl", mzituVM.getGirls().get(position));
-
-                Log.d(TAG, "onItemClick: " + mzituVM.getGirls().get(position).getDesc());
-                final ActivityOptionsCompat options;
-
-                if (Build.VERSION.SDK_INT >= 21) {
-                    options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            getActivity(), childView, mzituVM.getGirls().get(position).getDesc());
-                } else {
-                    options = ActivityOptionsCompat.makeScaleUpAnimation(
-                            childView, 0, 0, childView.getWidth(), childView.getHeight());
+                View iv = childView.findViewById(R.id.girliv);
+                if (iv == null) {
+                    iv = childView;
                 }
-
-                startActivity(intent, options.toBundle());
+                GirlPhotoActivity.launch(context, iv, position,
+                        mzituVM.getGirls().get(position));
             }
         });
     }
@@ -102,12 +86,46 @@ public class MzituFragment extends BaseFragment {
         super.onDetach();
         Log.d(TAG, "onDetach: " + title);
         context = null;
-        mzituVM.onDestory();
+        if (mzituVM != null) {
+            if (!insave) {
+                mzituVM.onDestory();
+                mzituVM = null;
+            } else {
+                mzituVM.onStop();
+            }
+        }
+    }
+
+    boolean insave = false;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState: " + outState + ".." + insave);
+        outState.putBoolean("insave", true);
+        insave = true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+        insave = false;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "onActivityCreated: " + savedInstanceState + ".." + insave);
+        if (savedInstanceState != null && savedInstanceState.getBoolean("insave")) {
+            Log.d(TAG, "onActivityCreated: " + insave);
+            mzituVM.onRestart(context);
+        }
+        insave = false;
     }
 
     @Override
     public void onViewDisappear() {
-
     }
 
     @Override
@@ -119,7 +137,7 @@ public class MzituFragment extends BaseFragment {
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                         24,
                         getResources().getDisplayMetrics()));
-        mzituVM.onRefresh.execute();
+        mzituVM.onStart();
     }
 
     @Override

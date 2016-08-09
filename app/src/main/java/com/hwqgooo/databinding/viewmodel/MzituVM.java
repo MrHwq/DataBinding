@@ -21,6 +21,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +50,20 @@ public class MzituVM extends BaseGirlVM {
     String title;
     int page;
     OkHttpClient client;
+    Context context;
+    static MzituVM girlVM;
+    static List<MzituVM> vms = new ArrayList<>();
+
+    public static MzituVM getInstance(Context context, String title) {
+        for (MzituVM vm : vms) {
+            if (vm.title.equals(title)) {
+                return vm;
+            }
+        }
+        MzituVM vm = new MzituVM(context, title);
+        vms.add(vm);
+        return vm;
+    }
 
     public OkHttpClient provideOkHttpClient(Context context) {
         Cache cache = new Cache(new File(context.getCacheDir(),
@@ -63,7 +78,8 @@ public class MzituVM extends BaseGirlVM {
         return newClient;
     }
 
-    public MzituVM(Context context, String title) {
+    private MzituVM(Context context, String title) {
+        this.context = context;
         TAG = "MzituVM" + title;
         Log.d(TAG, "MzituVM: " + title);
         this.title = title;
@@ -100,6 +116,31 @@ public class MzituVM extends BaseGirlVM {
                 Log.d(TAG, "call: " + girls.get(integer).getUrl());
             }
         });
+        client = provideOkHttpClient(context);
+    }
+
+
+    @Override
+    public void onStart() {
+        if (girls.isEmpty()) {
+            load(true);
+        }
+    }
+
+    @Override
+    public void onDestory() {
+        compositeSubscription.unsubscribe();
+        girls.clear();
+        vms.remove(this);
+    }
+
+    @Override
+    public void onStop() {
+        compositeSubscription.unsubscribe();
+    }
+
+    @Override
+    public void onRestart(Context context) {
         client = provideOkHttpClient(context);
     }
 
@@ -268,6 +309,7 @@ public class MzituVM extends BaseGirlVM {
                                 }
                             }
                         })
+                                .subscribeOn(Schedulers.io())
                                 .map(new Func1<Integer, List<String>>() {
                                     @Override
                                     public List<String> call(Integer integer) {
@@ -343,6 +385,7 @@ public class MzituVM extends BaseGirlVM {
                                 }
                             }
                         })
+                                .subscribeOn(Schedulers.io())
                                 .doOnTerminate(new Action0() {
                                     @Override
                                     public void call() {
@@ -366,10 +409,5 @@ public class MzituVM extends BaseGirlVM {
                                     }
                                 })
                 );
-    }
-
-    @Override
-    public void onDestory() {
-        compositeSubscription.unsubscribe();
     }
 }

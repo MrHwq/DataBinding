@@ -106,7 +106,7 @@ public class GirlPhotoActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private Transition enterTransition() {
         ChangeBounds bounds = new ChangeBounds();
-        bounds.setDuration(2000);
+//        bounds.setDuration(2000);
         Log.d(TAG, "enterTransition: ");
 
         return bounds;
@@ -116,7 +116,7 @@ public class GirlPhotoActivity extends AppCompatActivity {
     private Transition returnTransition() {
         ChangeBounds bounds = new ChangeBounds();
         bounds.setInterpolator(new DecelerateInterpolator());
-        bounds.setDuration(2000);
+//        bounds.setDuration(2000);
         Log.d(TAG, "returnTransition: ");
 
         return bounds;

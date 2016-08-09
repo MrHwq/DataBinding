@@ -46,7 +46,8 @@ android {
 
 
 def getReleaseApkName() {
-    return "${releaseTime()}"
+    return ""
+//    return "${releaseTime()}"
 }
 
 

@@ -36,7 +36,7 @@ public class GirlFragment extends BaseFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
-        girlVm = new GirlVM(context);
+        girlVm = GirlVM.getInstance(context);
     }
 
     @Nullable
@@ -95,8 +95,11 @@ public class GirlFragment extends BaseFragment {
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-
-                GirlPhotoActivity.launch(context, childView, position,
+                View iv = childView.findViewById(R.id.girliv);
+                if (iv == null) {
+                    iv = childView;
+                }
+                GirlPhotoActivity.launch(context, iv, position,
                         girlVm.getGirls().get(position));
             }
         });
@@ -105,11 +108,42 @@ public class GirlFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        girlVm.onDestory();
+        if (girlVm != null) {
+            if (!insave) {
+                girlVm.onDestory();
+                girlVm = null;
+            } else {
+                girlVm.onStop();
+            }
+        }
     }
 
     @Override
     public void onViewDisappear() {
+    }
+
+    boolean insave = false;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("insave", true);
+        insave = true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        insave = false;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.getBoolean("insave")) {
+            girlVm.onRestart(context);
+        }
+        insave = false;
     }
 
     @Override
@@ -121,7 +155,7 @@ public class GirlFragment extends BaseFragment {
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                         24,
                         getResources().getDisplayMetrics()));
-        girlVm.onRefresh.execute();
+        girlVm.onStart();
     }
 
     @Override
