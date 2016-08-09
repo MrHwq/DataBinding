@@ -2,12 +2,9 @@ package com.hwqgooo.databinding.ui.showgirl;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.util.Log;
 import android.util.TypedValue;
@@ -93,29 +90,14 @@ public class GirlFragment extends BaseFragment {
         binding.girlView.addOnItemTouchListener(new OnRcvClickListener(binding.girlView) {
             @Override
             public void onItemClick(View childView, int position) {
-//                GirlPhotoFragment fragment = new GirlPhotoFragment();
-//                Bundle bundle = new Bundle();
-//                bundle.putParcelable("girl", girlVm.getGirls().get(position));
-//                fragment.setArguments(bundle);
+//                GirlPhotoFragment fragment = new GirlPhotoFragment(context, girlVm.getGirls()
+// .get(position));
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-                final Intent intent = new Intent(context, GirlPhotoActivity.class);
-                intent.putExtra("index", position);
-                intent.putExtra("girl", girlVm.getGirls().get(position));
 
-                Log.d(TAG, "onItemClick: " + girlVm.getGirls().get(position).getDesc());
-                final ActivityOptionsCompat options;
-
-                if (Build.VERSION.SDK_INT >= 21) {
-                    options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            getActivity(), childView, girlVm.getGirls().get(position).getDesc());
-                } else {
-                    options = ActivityOptionsCompat.makeScaleUpAnimation(
-                            childView, 0, 0, childView.getWidth(), childView.getHeight());
-                }
-
-                startActivity(intent, options.toBundle());
+                GirlPhotoActivity.launch(context, childView, position,
+                        girlVm.getGirls().get(position));
             }
         });
     }

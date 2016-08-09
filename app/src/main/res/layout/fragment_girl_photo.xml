@@ -19,5 +19,5 @@
         android:adjustViewBounds="true"
         android:scaleType="fitXY"
         android:transitionName="@{girl.desc}"
-        app:uri="@{girl.url}"/>
+        app:uri_face="@{girl.url}"/>
 </layout>

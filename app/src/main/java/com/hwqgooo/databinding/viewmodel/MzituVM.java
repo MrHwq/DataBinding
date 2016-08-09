@@ -8,6 +8,7 @@ import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
+import com.hwqgooo.databinding.model.CacheInterceptor;
 import com.hwqgooo.databinding.model.bean.Girl;
 
 import org.jsoup.HttpStatusException;
@@ -16,12 +17,19 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cache;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -40,7 +48,20 @@ public class MzituVM extends BaseGirlVM {
     CompositeSubscription compositeSubscription;
     String title;
     int page;
+    OkHttpClient client;
 
+    public OkHttpClient provideOkHttpClient(Context context) {
+        Cache cache = new Cache(new File(context.getCacheDir(),
+                "HttpCache"), 1024 * 1024 * 100);
+        OkHttpClient newClient = new OkHttpClient().newBuilder()
+                .addNetworkInterceptor(new CacheInterceptor())
+                .cache(cache)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+
+        return newClient;
+    }
 
     public MzituVM(Context context, String title) {
         TAG = "MzituVM" + title;
@@ -79,6 +100,7 @@ public class MzituVM extends BaseGirlVM {
                 Log.d(TAG, "call: " + girls.get(integer).getUrl());
             }
         });
+        client = provideOkHttpClient(context);
     }
 
     private void load(final boolean isRefresh) {
@@ -98,10 +120,18 @@ public class MzituVM extends BaseGirlVM {
                                 url = baseUrl + title + "/page/" + page;
                             }
                             Log.d(TAG, "call: " + url);
-                            Document document = Jsoup.connect(url)
-                                    .userAgent("Mozilla")
-                                    .timeout(8000)
-                                    .get();
+                            Request request = new Request.Builder().url(url).build();
+                            Call call = client.newCall(request);
+                            Response response = call.execute();
+                            if (!response.isSuccessful()) {
+                                throw new Exception("okhttp execute fail");
+                            }
+
+//                            Document document = Jsoup.connect(url)
+//                                    .userAgent("Mozilla")
+//                                    .timeout(8000)
+//                                    .get();
+                            Document document = Jsoup.parse(response.body().string());
                             Elements elements = document.select
                                     ("div[class=main-content]");
                             subscriber.onNext(elements.html());
@@ -118,11 +148,11 @@ public class MzituVM extends BaseGirlVM {
                                 return getSubjectUrl(s);
                             }
                         })
-                        .flatMap(new Func1<List<Pair<String, String>>, Observable<Pair<String,
-                                String>>>() {
+                        .flatMap(new Func1<List<Pair<String, String>>,
+                                Observable<Pair<String, String>>>() {
                             @Override
-                            public Observable<Pair<String, String>> call(List<Pair<String,
-                                    String>> pairs) {
+                            public Observable<Pair<String, String>> call(
+                                    List<Pair<String, String>> pairs) {
                                 return Observable.from(pairs);
                             }
                         })
@@ -140,6 +170,12 @@ public class MzituVM extends BaseGirlVM {
                             @Override
                             public void call(Throwable throwable) {
                                 isRefreshing.set(false);
+                            }
+                        })
+                        .doOnCompleted(new Action0() {
+                            @Override
+                            public void call() {
+                                ++page;
                             }
                         })
                         .subscribe(new Subscriber<Pair<String, String>>() {
@@ -206,10 +242,18 @@ public class MzituVM extends BaseGirlVM {
                             @Override
                             public void call(Subscriber<? super Integer> subscriber) {
                                 try {
-                                    Document document = Jsoup.connect(pair.first)
-                                            .userAgent("Mozilla")
-                                            .timeout(8000)
-                                            .get();
+                                    Request request = new Request.Builder().url(pair.first).build();
+                                    Call call = client.newCall(request);
+                                    Response response = call.execute();
+                                    if (!response.isSuccessful()) {
+                                        throw new Exception("okhttp execute fail");
+                                    }
+                                    Document document = Jsoup.parse(response.body().string());
+
+//                                    Document document = Jsoup.connect(pair.first)
+//                                            .userAgent("Mozilla")
+//                                            .timeout(8000)
+//                                            .get();
                                     Elements elements = document.select
                                             ("div[class=pagenavi]");
 //                                    Log.d(TAG, "call: " + elements.html());
@@ -272,10 +316,18 @@ public class MzituVM extends BaseGirlVM {
                             @Override
                             public void call(Subscriber<? super Girl> subscriber) {
                                 try {
-                                    Document document = Jsoup.connect(url)
-                                            .userAgent("Mozilla")
-                                            .timeout(8000)
-                                            .get();
+                                    Request request = new Request.Builder().url(url).build();
+                                    Call call = client.newCall(request);
+                                    Response response = call.execute();
+                                    if (!response.isSuccessful()) {
+                                        throw new Exception("okhttp execute fail");
+                                    }
+                                    Document document = Jsoup.parse(response.body().string());
+
+//                                    Document document = Jsoup.connect(url)
+//                                            .userAgent("Mozilla")
+//                                            .timeout(8000)
+//                                            .get();
                                     Elements elements = document.select
                                             ("div[class=main-image]");
 //                                    Log.d(TAG, "call: " + elements.html());

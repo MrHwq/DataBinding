@@ -1,10 +1,14 @@
 package com.hwqgooo.databinding.ui.showgirlphoto;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.ChangeBounds;
@@ -30,6 +34,29 @@ public class GirlPhotoActivity extends AppCompatActivity {
     Girl girl;
     MainThemeVM vm;
     int index;
+
+    public static void launch(Context context, View childView, int position, Girl girl) {
+        final Intent intent = new Intent(context, GirlPhotoActivity.class);
+        intent.putExtra("index", position);
+        intent.putExtra("girl", girl);
+
+        Log.d(TAG, "onItemClick: " + girl.getDesc());
+        final ActivityOptionsCompat options;
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    (Activity)context, childView, girl.getDesc());
+        } else {
+            options = ActivityOptionsCompat.makeScaleUpAnimation(
+                    childView, 0, 0, childView.getWidth(), childView.getHeight());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            context.startActivity(intent, options.toBundle());
+        } else {
+            context.startActivity(intent);
+        }
+    }
 
     //Activity.supportFinishAfterTransition() method instead of Activity.finish()
     @Override

@@ -22,8 +22,10 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.hwqgooo.databinding.command.ReplyCommand;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class ViewBindingAdapter {
     public final static String TAG = "ImageViewBindingAdapter";
@@ -67,45 +69,66 @@ public class ViewBindingAdapter {
                                 .map(new Func1<Bitmap, Bitmap>() {
                                     @Override
                                     public Bitmap call(Bitmap bitmap) {
-                                        FaceDetector faceDetector = new FaceDetector(bitmap
-                                                .getWidth(), bitmap.getHeight(), 1);
-                                        FaceDetector.Face[] face = new FaceDetector.Face[1];
-                                        Log.d(TAG, "call: go find face");
-                                        if (faceDetector.findFaces(bitmap, face) > 0) {
-                                            Log.d(TAG, "call: find face one");
-                                            FaceDetector.Face f = face[0];
-                                            PointF midPoint = new PointF();
-                                            float dis = f.eyesDistance();
-                                            f.getMidPoint(midPoint);
-                                            int dd = (int) (dis);
-                                            Point eyeLeft = new Point((int) (midPoint.x - dis /
-                                                    2), (int) midPoint.y);
-                                            Point eyeRight = new Point((int) (midPoint.x + dis /
-                                                    2), (int) midPoint.y);
-                                            Rect faceRect = new Rect((int) (midPoint.x - dd),
-                                                    (int) (midPoint.y - dd), (int) (midPoint.x +
-                                                    dd), (int) (midPoint.y + dd));
-                                            Canvas canvas = new Canvas(bitmap);
-                                            Paint p = new Paint();
-                                            p.setAntiAlias(true);
-                                            p.setStrokeWidth(8);
-                                            p.setStyle(Paint.Style.STROKE);
-                                            p.setColor(Color.GREEN);
-                                            canvas.drawCircle(eyeLeft.x, eyeLeft.y, 20, p);
-                                            canvas.drawCircle(eyeRight.x, eyeRight.y, 20, p);
-                                            canvas.drawRect(faceRect, p);
-                                            Log.d(TAG, "call: " + faceRect.flattenToString());
+                                        try {
+                                            Log.d("hwqhwq", "" + imageView.getWidth());
+                                            Log.d("hwqhwq", "" + imageView.getHeight());
+                                            FaceDetector faceDetector = new FaceDetector(bitmap
+                                                    .getWidth(), bitmap.getHeight(), 1);
+                                            FaceDetector.Face[] face = new FaceDetector.Face[1];
+                                            Log.d(TAG, "call: go find face");
+                                            if (faceDetector.findFaces(bitmap, face) > 0) {
+                                                Log.d(TAG, "call: find face one");
+                                                FaceDetector.Face f = face[0];
+                                                PointF midPoint = new PointF();
+                                                float dis = f.eyesDistance();
+                                                f.getMidPoint(midPoint);
+                                                int dd = (int) (dis);
+                                                Point eyeLeft = new Point((int) (midPoint.x - dis /
+                                                        2), (int) midPoint.y);
+                                                Point eyeRight = new Point((int) (midPoint.x + dis /
+                                                        2), (int) midPoint.y);
+                                                Rect faceRect = new Rect((int) (midPoint.x - dd),
+                                                        (int) (midPoint.y - dd), (int) (midPoint.x +
+                                                        dd), (int) (midPoint.y + dd));
+                                                Bitmap.Config config =
+                                                        bitmap.getConfig() != null ? bitmap
+                                                                .getConfig
+
+                                                                        () : Bitmap.Config
+                                                                .ARGB_8888;
+                                                Bitmap result = Bitmap.createBitmap(bitmap
+                                                                .getWidth()
+                                                        , bitmap.getHeight(), config);
+                                                Canvas canvas = new Canvas(result);
+                                                Log.d(TAG, "call: " + faceRect.flattenToString());
+//                                            canvas.drawBitmap(bitmap, null, , null);
+                                                canvas.drawBitmap(bitmap, 0, 0, null);
+                                                bitmap.recycle();
+                                                Paint p = new Paint();
+                                                p.setAntiAlias(true);
+                                                p.setStrokeWidth(8);
+                                                p.setStyle(Paint.Style.STROKE);
+                                                p.setColor(Color.GREEN);
+                                                canvas.drawCircle(eyeLeft.x, eyeLeft.y, 20, p);
+                                                canvas.drawCircle(eyeRight.x, eyeRight.y, 20, p);
+                                                canvas.drawRect(faceRect, p);
+                                                return result;
+                                            }
+                                            return bitmap;
+                                        } catch (Exception e) {
+                                            return bitmap;
                                         }
-                                        return bitmap;
                                     }
                                 })
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Action1<Bitmap>() {
                                     @Override
                                     public void call(Bitmap bitmap) {
                                         imageView.setImageBitmap(bitmap);
                                     }
                                 });
-                        imageView.setImageBitmap(resource);
+//                        imageView.setImageBitmap(resource);
                     }
                 });
     }
@@ -127,6 +150,7 @@ public class ViewBindingAdapter {
                 Glide.with(imageView.getContext())
                         .load(uri)
                         .asBitmap()
+                        .fitCenter()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(new SimpleTarget<Bitmap>() {
                             @Override
@@ -141,11 +165,6 @@ public class ViewBindingAdapter {
                             @Override
                             public void onResourceReady(Bitmap resource, GlideAnimation<? super
                                     Bitmap> glideAnimation) {
-//                                float ratio = (float) resource.getWidth() / (float) resource
-//                                        .getHeight();
-//                                ViewGroup.LayoutParams params = imageView.getLayoutParams();
-//                                params.height = (int) ((float) params.width / ratio);
-//                                imageView.setLayoutParams(params);
                                 imageView.setImageBitmap(resource);
                                 if (onSuccessCommand != null) {
                                     onSuccessCommand.execute(resource);
@@ -156,7 +175,7 @@ public class ViewBindingAdapter {
                 Glide.with(imageView.getContext())
                         .load(uri)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .centerCrop()
+                        .fitCenter()
                         .into(imageView);
             }
         }

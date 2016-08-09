@@ -8,6 +8,7 @@ import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.message.Messenger;
+import com.hwqgooo.databinding.model.CacheHttpClient;
 import com.hwqgooo.databinding.model.bean.Girl;
 import com.hwqgooo.databinding.model.bean.GirlData;
 import com.hwqgooo.databinding.model.showgirl.IGirlService;
@@ -42,6 +43,7 @@ public class GirlVM extends BaseGirlVM {
     public GirlVM(Context context) {
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
+                .client(CacheHttpClient.getOkHttpClient(context))
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
