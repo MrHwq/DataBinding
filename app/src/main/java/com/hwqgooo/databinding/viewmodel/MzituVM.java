@@ -51,6 +51,8 @@ public class MzituVM extends BaseGirlVM {
     int page;
     OkHttpClient client;
     Context context;
+    List<Pair<String, String>> subUrl;
+
     static MzituVM girlVM;
     static List<MzituVM> vms = new ArrayList<>();
 
@@ -145,95 +147,113 @@ public class MzituVM extends BaseGirlVM {
     }
 
     private void load(final boolean isRefresh) {
-        compositeSubscription.unsubscribe();
-        compositeSubscription = new CompositeSubscription();
+        if (compositeSubscription != null && compositeSubscription.isUnsubscribed()) {
+            compositeSubscription.unsubscribe();
+            compositeSubscription = new CompositeSubscription();
+        }
         isRefreshing.set(true);
         Log.d(TAG, "load: " + title + "..." + page);
-        compositeSubscription.add(
-                Observable.create(new Observable.OnSubscribe<String>() {
-                    @Override
-                    public void call(Subscriber<? super String> subscriber) {
-                        String url = null;
-                        try {
-                            if (page == 1) {
-                                url = baseUrl + title;
-                            } else {
-                                url = baseUrl + title + "/page/" + page;
-                            }
-                            Log.d(TAG, "call: " + url);
-                            Request request = new Request.Builder().url(url).build();
-                            Call call = client.newCall(request);
-                            Response response = call.execute();
-                            if (!response.isSuccessful()) {
-                                throw new Exception("okhttp execute fail");
-                            }
+        if (!isRefresh && subUrl != null && !subUrl.isEmpty()) {
+            Pair<String, String> pair = subUrl.get(0);
+            subUrl.remove(0);
+            Log.d(TAG, "load: " + pair.first + "..." + pair.second);
+            getSuburl(pair);
+            return;
+        }
+        compositeSubscription.add(Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                try {
+                    String url;
+                    if (page == 1) {
+                        url = baseUrl + title;
+                    } else {
+                        url = baseUrl + title + "/page/" + page;
+                    }
+                    Log.d(TAG, "call: " + url);
+                    Request request = new Request.Builder().url(url).build();
+                    Call call = client.newCall(request);
+                    Response response = call.execute();
+                    if (!response.isSuccessful()) {
+                        throw new Exception("okhttp execute fail");
+                    }
 
-//                            Document document = Jsoup.connect(url)
-//                                    .userAgent("Mozilla")
-//                                    .timeout(8000)
+//                    Document document = Jsoup.connect(url)
+//                            .userAgent("Mozilla")
+//                            .timeout(8000)
 //                                    .get();
-                            Document document = Jsoup.parse(response.body().string());
-                            Elements elements = document.select
-                                    ("div[class=main-content]");
-                            subscriber.onNext(elements.html());
-                            subscriber.onCompleted();
-                        } catch (Exception e) {
-                            subscriber.onError(e);
-                        }
+                    Document document = Jsoup.parse(response.body().string());
+                    Elements elements = document.select
+                            ("div[class=main-content]");
+                    subscriber.onNext(elements.html());
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<String, List<Pair<String, String>>>() {
+                    @Override
+                    public List<Pair<String, String>> call(String s) {
+                        return getSubjectUrl(s);
                     }
                 })
-                        .subscribeOn(Schedulers.io())
-                        .map(new Func1<String, List<Pair<String, String>>>() {
-                            @Override
-                            public List<Pair<String, String>> call(String s) {
-                                return getSubjectUrl(s);
-                            }
-                        })
-                        .flatMap(new Func1<List<Pair<String, String>>,
-                                Observable<Pair<String, String>>>() {
-                            @Override
-                            public Observable<Pair<String, String>> call(
-                                    List<Pair<String, String>> pairs) {
-                                return Observable.from(pairs);
-                            }
-                        })
-                        .filter(new Func1<Pair<String, String>, Boolean>() {
-                            @Override
-                            public Boolean call(Pair<String, String> stringStringPair) {
-                                if (stringStringPair.first.startsWith("http")) {
-                                    return Boolean.TRUE;
-                                }
-                                Log.d(TAG, "load call: " + stringStringPair.first);
-                                return Boolean.FALSE;
-                            }
-                        })
-                        .doOnError(new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                isRefreshing.set(false);
-                            }
-                        })
-                        .doOnCompleted(new Action0() {
-                            @Override
-                            public void call() {
-                                ++page;
-                            }
-                        })
-                        .subscribe(new Subscriber<Pair<String, String>>() {
-                            @Override
-                            public void onCompleted() {
-                            }
+                .flatMap(new Func1<List<Pair<String, String>>, Observable<Pair<String, String>>>() {
+                    @Override
+                    public Observable<Pair<String, String>> call(List<Pair<String, String>> pairs) {
+                        if (pairs.isEmpty()) {
+                            return Observable.error(new Throwable("load pairs is null"));
+                        }
+                        Log.d(TAG, "load pair call: " + pairs.size());
+                        if (pairs.size() > 1) {
+                            subUrl = pairs.subList(1, pairs.size());
+                        }
+                        Log.d(TAG, "load suburl call: " + subUrl.size());
+                        if (isRefresh) {
+                            girls.clear();
+                        }
+                        return Observable.just(pairs.get(0));
+                    }
+                })
+                .filter(new Func1<Pair<String, String>, Boolean>() {
+                    @Override
+                    public Boolean call(Pair<String, String> stringStringPair) {
+                        if (stringStringPair.first.startsWith("http")) {
+                            return Boolean.TRUE;
+                        }
+                        Log.d(TAG, "load call: " + stringStringPair.first);
+                        return Boolean.FALSE;
+                    }
+                })
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        isRefreshing.set(false);
+                    }
+                })
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        ++page;
+                    }
+                })
+                .subscribe(new Subscriber<Pair<String, String>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                error(e);
-                            }
+                    @Override
+                    public void onError(Throwable e) {
+                        error(e);
+                    }
 
-                            @Override
-                            public void onNext(Pair<String, String> pair) {
-                                getSuburl(pair);
-                            }
-                        }));
+                    @Override
+                    public void onNext(Pair<String, String> pair) {
+                        Log.d(TAG, "onNext: " + pair.first + "..." + pair.second);
+                        getSuburl(pair);
+                    }
+                }));
     }
 
     List<Pair<String, String>> getSubjectUrl(final String tophtml) {
@@ -277,137 +297,134 @@ public class MzituVM extends BaseGirlVM {
         }
     }
 
+    //获取girl列表
     void getSuburl(final Pair<String, String> pair) {
-        compositeSubscription
-                .add(Observable.create(new Observable.OnSubscribe<Integer>() {
-                            @Override
-                            public void call(Subscriber<? super Integer> subscriber) {
-                                try {
-                                    Request request = new Request.Builder().url(pair.first).build();
-                                    Call call = client.newCall(request);
-                                    Response response = call.execute();
-                                    if (!response.isSuccessful()) {
-                                        throw new Exception("okhttp execute fail");
-                                    }
-                                    Document document = Jsoup.parse(response.body().string());
+        compositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
+                    @Override
+                    public void call(Subscriber<? super Integer> subscriber) {
+                        try {
+                            Request request = new Request.Builder().url(pair.first).build();
+                            Call call = client.newCall(request);
+                            Response response = call.execute();
+                            if (!response.isSuccessful()) {
+                                throw new Exception("okhttp execute fail");
+                            }
+                            Document document = Jsoup.parse(response.body().string());
 
-//                                    Document document = Jsoup.connect(pair.first)
-//                                            .userAgent("Mozilla")
-//                                            .timeout(8000)
+//                            Document document = Jsoup.connect(pair.first)
+//                                    .userAgent("Mozilla")
+//                                    .timeout(8000)
 //                                            .get();
-                                    Elements elements = document.select
-                                            ("div[class=pagenavi]");
+                            Elements elements = document.select
+                                    ("div[class=pagenavi]");
 //                                    Log.d(TAG, "call: " + elements.html());
-                                    Elements suburl = elements.select("a");
-                                    if (suburl.size() - 2 >= 0) {
-                                        Element e = suburl.get(suburl.size() - 2);
-                                        subscriber.onNext(Integer.valueOf(e.text()));
-                                        subscriber.onCompleted();
-                                    }
-                                } catch (Exception e) {
-                                    subscriber.onError(e);
+                            Elements suburl = elements.select("a");
+                            if (suburl.size() - 2 >= 0) {
+                                Element e = suburl.get(suburl.size() - 2);
+                                subscriber.onNext(Integer.valueOf(e.text()));
+                                subscriber.onCompleted();
+                            }
+                        } catch (Exception e) {
+                            subscriber.onError(e);
+                        }
+                    }
+                })
+                        .subscribeOn(Schedulers.io())
+                        .map(new Func1<Integer, List<String>>() {
+                            @Override
+                            public List<String> call(Integer integer) {
+                                List<String> urls = new LinkedList<String>();
+                                int all = integer.intValue();
+                                urls.add(pair.first);
+                                for (int idx = 2; idx <= all; ++idx) {
+                                    urls.add(pair.first + "/" + Integer.toString(idx));
                                 }
+                                return urls;
                             }
                         })
-                                .subscribeOn(Schedulers.io())
-                                .map(new Func1<Integer, List<String>>() {
-                                    @Override
-                                    public List<String> call(Integer integer) {
-                                        List<String> urls = new LinkedList<String>();
-                                        int all = integer.intValue();
-                                        urls.add(pair.first);
-                                        for (int idx = 2; idx <= all; ++idx) {
-                                            urls.add(pair.first + "/" + Integer.toString(idx));
-                                        }
-                                        return urls;
-                                    }
-                                })
-                                .flatMap(new Func1<List<String>, Observable<String>>() {
-                                    @Override
-                                    public Observable<String> call(List<String> strings) {
-                                        return Observable.from(strings);
-                                    }
-                                })
-                                .doOnError(new Action1<Throwable>() {
-                                    @Override
-                                    public void call(Throwable throwable) {
-                                        isRefreshing.set(false);
-                                    }
-                                })
-                                .subscribe(new Subscriber<String>() {
-                                    @Override
-                                    public void onCompleted() {
-                                    }
+                        .flatMap(new Func1<List<String>, Observable<String>>() {
+                            @Override
+                            public Observable<String> call(List<String> strings) {
+                                return Observable.from(strings);
+                            }
+                        })
+                        .doAfterTerminate(new Action0() {
+                            @Override
+                            public void call() {
+                                isRefreshing.set(false);
+                            }
+                        })
+                        .subscribe(new Subscriber<String>() {
+                            @Override
+                            public void onCompleted() {
+                            }
 
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        error(e);
-                                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                error(e);
+                            }
 
-                                    @Override
-                                    public void onNext(String string) {
-                                        getGirl(string);
-                                    }
-                                })
-                );
+                            @Override
+                            public void onNext(String string) {
+                                getGirl(string);
+                            }
+                        })
+        );
     }
 
     void getGirl(final String url) {
-        compositeSubscription
-                .add(Observable.create(new Observable.OnSubscribe<Girl>() {
-                            @Override
-                            public void call(Subscriber<? super Girl> subscriber) {
-                                try {
-                                    Request request = new Request.Builder().url(url).build();
-                                    Call call = client.newCall(request);
-                                    Response response = call.execute();
-                                    if (!response.isSuccessful()) {
-                                        throw new Exception("okhttp execute fail");
-                                    }
-                                    Document document = Jsoup.parse(response.body().string());
+        compositeSubscription.add(Observable.create(new Observable.OnSubscribe<Girl>() {
+                    @Override
+                    public void call(Subscriber<? super Girl> subscriber) {
+                        try {
+                            Request request = new Request.Builder().url(url).build();
+                            Call call = client.newCall(request);
+                            Response response = call.execute();
+                            if (!response.isSuccessful()) {
+                                throw new Exception("okhttp execute fail");
+                            }
+                            Document document = Jsoup.parse(response.body().string());
 
 //                                    Document document = Jsoup.connect(url)
 //                                            .userAgent("Mozilla")
 //                                            .timeout(8000)
 //                                            .get();
-                                    Elements elements = document.select
-                                            ("div[class=main-image]");
+                            Elements elements = document.select
+                                    ("div[class=main-image]");
 //                                    Log.d(TAG, "call: " + elements.html());
-                                    Elements suburl = elements.select("img");
+                            Elements suburl = elements.select("img");
 //                                    Log.d(TAG, "call: " + suburl.attr("src"));
 //                                    Log.d(TAG, "call: " + suburl.attr("alt"));
-                                    subscriber.onNext(new Girl(suburl.attr("alt"), suburl
-                                            .attr
-                                                    ("src")));
-                                    subscriber.onCompleted();
-                                } catch (Exception e) {
-                                    subscriber.onError(e);
-                                }
+                            subscriber.onNext(new Girl(suburl.attr("alt"), suburl.attr("src")));
+                            subscriber.onCompleted();
+                        } catch (Exception e) {
+                            subscriber.onError(e);
+                        }
+                    }
+                })
+                        .subscribeOn(Schedulers.io())
+                        .doOnTerminate(new Action0() {
+                            @Override
+                            public void call() {
+                                isRefreshing.set(false);
                             }
                         })
-                                .subscribeOn(Schedulers.io())
-                                .doOnTerminate(new Action0() {
-                                    @Override
-                                    public void call() {
-                                        isRefreshing.set(false);
-                                    }
-                                })
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Subscriber<Girl>() {
-                                    @Override
-                                    public void onCompleted() {
-                                    }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<Girl>() {
+                            @Override
+                            public void onCompleted() {
+                            }
 
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        error(e);
-                                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                error(e);
+                            }
 
-                                    @Override
-                                    public void onNext(Girl girl) {
-                                        girls.add(girl);
-                                    }
-                                })
-                );
+                            @Override
+                            public void onNext(Girl girl) {
+                                girls.add(girl);
+                            }
+                        })
+        );
     }
 }

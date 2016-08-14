@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="android.view.View"/>
+
         <variable
             name="girl"
             type="com.hwqgooo.databinding.model.bean.Girl"/>
@@ -27,7 +29,8 @@
             <ImageView
                 android:id="@+id/girliv"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 android:transitionName="@{girl.desc}"
@@ -41,7 +44,8 @@
                 android:paddingBottom="10dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
-                android:paddingTop="10dp">
+                android:paddingTop="10dp"
+                android:visibility="@{girl.getDesc().isEmpty() ? View.GONE : View.VISIBLE}">
 
                 <TextView
                     android:layout_width="wrap_content"

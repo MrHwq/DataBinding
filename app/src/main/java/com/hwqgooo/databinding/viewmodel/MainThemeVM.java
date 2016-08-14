@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.graphics.Bitmap;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 
@@ -75,8 +76,8 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
 
     private MainThemeVM(Context context) {
         this.context = context;
-        selectColor = context.getResources().getColor(R.color.colorPrimary);
-        unselectColor = context.getResources().getColor(R.color.colorAccent);
+        selectColor = ContextCompat.getColor(context, R.color.colorPrimary);
+        unselectColor = ContextCompat.getColor(context, R.color.colorAccent);
         appbarName = context.getResources().getStringArray(R.array.appbarname);
         toolbarTitle = appbarName[EXPANDED];
         Messenger.getDefault().register(context,
@@ -135,7 +136,9 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
     @Bindable
     public String getToolbarImage() {
         return toolbarImage;
-    }    @Override
+    }
+
+    @Override
     public void setToolbarState(int state) {
         this.toolbalState = state;
         if (state == EXPANDED) {
@@ -153,12 +156,12 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
         this.toolbarImage = toolbarImage;
         notifyPropertyChanged(BR.toolbarImage);
         Log.d(TAG, "setToolbarImage: " + toolbarImage);
-    }    @Override
+    }
+
+    @Override
     public int getToolbarState() {
         return toolbalState;
     }
-
-
 
 
 }
