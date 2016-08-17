@@ -1,9 +1,9 @@
-package com.hwqgooo.databinding.bindingcollectionadapter.factories;
+package me.tatarka.bindingcollectionadapter.factories;
 
 import android.widget.AdapterView;
 
-import com.hwqgooo.databinding.bindingcollectionadapter.BindingListViewAdapter;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemViewArg;
+import me.tatarka.bindingcollectionadapter.BindingListViewAdapter;
+import me.tatarka.bindingcollectionadapter.ItemViewArg;
 
 
 public interface BindingAdapterViewFactory {

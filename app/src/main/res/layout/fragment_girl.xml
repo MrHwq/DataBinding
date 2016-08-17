@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="com.hwqgooo.databinding.bindingcollectionadapter.LayoutManagers"/>
+        <import type="me.tatarka.bindingcollectionadapter.LayoutManagers"/>
 
         <import type="android.support.v7.widget.StaggeredGridLayoutManager"/>
 

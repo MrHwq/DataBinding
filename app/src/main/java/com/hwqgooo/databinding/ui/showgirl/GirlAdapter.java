@@ -1,15 +1,11 @@
 package com.hwqgooo.databinding.ui.showgirl;
 
-import android.databinding.ViewDataBinding;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
-import com.hwqgooo.databinding.bindingcollectionadapter.BindingRecyclerViewAdapter;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemViewArg;
-import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.model.bean.Girl;
+
+import me.tatarka.bindingcollectionadapter.BindingRecyclerViewAdapter;
+import me.tatarka.bindingcollectionadapter.ItemViewArg;
 
 /**
  * Created by weiqiang on 2016/7/6.
@@ -22,20 +18,20 @@ public class GirlAdapter extends BindingRecyclerViewAdapter<Girl> {
         super(arg);
     }
 
-    @Override
-    public ViewDataBinding onCreateBinding(LayoutInflater inflater, @LayoutRes int layoutId,
-                                           ViewGroup viewGroup) {
-        ItemGirlBinding binding = (ItemGirlBinding) super.onCreateBinding(inflater, layoutId,
-                viewGroup);
-        ViewGroup.LayoutParams params = binding.girliv.getLayoutParams();
-        int widthPixels = binding.girliv.getContext().getResources().getDisplayMetrics()
-                .widthPixels;
-        float scale = (float) (Math.random() + 1);
-        while (scale > 1.6 || scale < 1.1) {
-            scale = (float) (Math.random() + 1);
-        }
-        params.height = (int) (widthPixels * scale * 0.448);
-        binding.girliv.setLayoutParams(params);
-        return binding;
-    }
+//    @Override
+//    public ViewDataBinding onCreateBinding(LayoutInflater inflater, @LayoutRes int layoutId,
+//                                           ViewGroup viewGroup) {
+//        ItemGirlBinding binding = (ItemGirlBinding) super.onCreateBinding(inflater, layoutId,
+//                viewGroup);
+//        ViewGroup.LayoutParams params = binding.girliv.getLayoutParams();
+//        int widthPixels = binding.girliv.getContext().getResources().getDisplayMetrics()
+//                .widthPixels;
+//        float scale = (float) (Math.random() + 1);
+//        while (scale > 1.6 || scale < 1.1) {
+//            scale = (float) (Math.random() + 1);
+//        }
+//        params.height = (int) (widthPixels * scale * 0.448);
+//        binding.girliv.setLayoutParams(params);
+//        return binding;
+//    }
 }

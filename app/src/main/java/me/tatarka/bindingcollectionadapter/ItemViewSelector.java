@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter;
+package me.tatarka.bindingcollectionadapter;
 
 /**
  * Modify an {@link ItemView} based on the given position and item. This allows you to have

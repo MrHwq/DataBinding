@@ -20,24 +20,25 @@ public class ViewBindingAdapter {
 
     @BindingAdapter(value = {"request_width", "request_height"},
             requireAll = false)
-    public static void loadImage(final View imageView, int width, int height) {
+    public static void loadImage(final View view, int width, int height) {
         if (width > 0 && height > 0) {
-            ViewGroup.LayoutParams params = imageView.getLayoutParams();
+            ViewGroup.LayoutParams params = view.getLayoutParams();
             params.height = height;
             params.width = width;
-            imageView.setLayoutParams(params);
+            view.setLayoutParams(params);
         }
     }
 
     @BindingAdapter({"clickCommand"})
     public static void clickCommand(View view, final ReplyCommand clickCommand) {
-        Log.d(TAG, "clickCommand: ");
+        Log.d(TAG, "clickCommand: " + clickCommand);
+        if (clickCommand == null) {
+            return;
+        }
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (clickCommand != null) {
-                    clickCommand.execute();
-                }
+                clickCommand.execute();
             }
         });
     }

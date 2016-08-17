@@ -8,8 +8,8 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 /**
  * Created by weiqiang on 2016/6/12.
  */
-public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener implements
-        OnBottomListener {
+public abstract class OnRcvScrollListener extends RecyclerView.OnScrollListener
+        implements OnBottomListener {
     final String TAG = getClass().getSimpleName();
     /**
      * layoutManager的类型（枚举）

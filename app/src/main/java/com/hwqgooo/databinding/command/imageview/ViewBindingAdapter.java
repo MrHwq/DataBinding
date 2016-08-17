@@ -17,6 +17,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.hwqgooo.databinding.command.ReplyCommand;
@@ -134,50 +135,47 @@ public class ViewBindingAdapter {
     }
 
     @BindingAdapter(value = {"uri",
-            "placeholderImageRes",
+            "errorImage",
             "onSuccessCommand",
             "onFailureCommand"},
             requireAll = false)
     public static void loadUrlImage(final ImageView imageView, String uri,
-                                    @DrawableRes int placeholderImageRes,
-                                    final ReplyCommand<Bitmap> onSuccessCommand,
+                                    @DrawableRes final int errorImage,
+                                    final ReplyCommand<Drawable> onSuccessCommand,
                                     final ReplyCommand onFailureCommand) {
-        if (placeholderImageRes > 0) {
-            imageView.setImageResource(placeholderImageRes);
+        if (TextUtils.isEmpty(uri)) {
+            imageView.setImageDrawable(null);
+            return;
         }
-        if (!TextUtils.isEmpty(uri)) {
-            if (onSuccessCommand != null || onFailureCommand != null) {
-                Glide.with(imageView.getContext())
-                        .load(uri)
-                        .asBitmap()
-                        .fitCenter()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                                super.onLoadFailed(e, errorDrawable);
-                                imageView.setImageDrawable(null);
-                                if (onFailureCommand != null) {
-                                    onFailureCommand.execute();
-                                }
+        try {
+            Glide.with(imageView.getContext())
+                    .load(uri)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .centerCrop()
+                    .into(new SimpleTarget<GlideDrawable>() {
+                        @Override
+                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                            super.onLoadFailed(e, errorDrawable);
+                            imageView.setImageResource(errorImage);
+                            if (onFailureCommand != null) {
+                                onFailureCommand.execute();
                             }
+                            Log.d(TAG, "onLoadFailed: ");
+                        }
 
-                            @Override
-                            public void onResourceReady(Bitmap resource, GlideAnimation<? super
-                                    Bitmap> glideAnimation) {
-                                imageView.setImageBitmap(resource);
-                                if (onSuccessCommand != null) {
-                                    onSuccessCommand.execute(resource);
-                                }
+                        @Override
+                        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super
+                                GlideDrawable> glideAnimation) {
+                            imageView.setImageDrawable(resource);
+                            if (onSuccessCommand != null) {
+                                onSuccessCommand.execute(resource);
                             }
-                        });
-            } else {
-                Glide.with(imageView.getContext())
-                        .load(uri)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .fitCenter()
-                        .into(imageView);
-            }
+                        }
+                    });
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "loadUrlImage: " + e.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

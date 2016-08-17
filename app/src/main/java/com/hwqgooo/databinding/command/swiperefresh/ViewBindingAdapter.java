@@ -21,13 +21,14 @@ public class ViewBindingAdapter {
     @BindingAdapter({"onRefreshCommand"})
     public static void onRefreshCommand(SwipeRefreshLayout swipeRefreshLayout, final ReplyCommand
             onRefreshCommand) {
-        Log.d(TAG, "onRefreshCommand: ");
+        Log.d(TAG, "onRefreshCommand: " + swipeRefreshLayout);
+        if (onRefreshCommand == null) {
+            return;
+        }
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (onRefreshCommand != null) {
-                    onRefreshCommand.execute();
-                }
+                onRefreshCommand.execute();
             }
         });
     }

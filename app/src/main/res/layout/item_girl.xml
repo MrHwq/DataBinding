@@ -32,7 +32,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
+                android:scaleType="fitXY"
                 android:transitionName="@{girl.desc}"
                 app:uri="@{girl.url}"/>
 
@@ -50,6 +50,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
                     android:text="@{girl.getDesc()}"
                     android:textAppearance="?android:attr/textAppearanceSmall"/>
             </LinearLayout>

@@ -63,5 +63,4 @@ public class ReplyCommand<T> {
             execute1.call(parameter);
         }
     }
-
 }

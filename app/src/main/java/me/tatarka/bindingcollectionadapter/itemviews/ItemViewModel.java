@@ -1,7 +1,7 @@
-package com.hwqgooo.databinding.bindingcollectionadapter.itemviews;
+package me.tatarka.bindingcollectionadapter.itemviews;
 
 
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
+import me.tatarka.bindingcollectionadapter.ItemView;
 
 /**
  * Implement this interface on yor items to use with {@link ItemViewModelSelector}.

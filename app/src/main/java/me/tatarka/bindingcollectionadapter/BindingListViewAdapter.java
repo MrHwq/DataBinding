@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter;
+package me.tatarka.bindingcollectionadapter;
 
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableList;
@@ -133,9 +133,8 @@ public class BindingListViewAdapter<T> extends BaseAdapter implements BindingCol
         ViewDataBinding binding;
         if (convertView == null) {
             binding = onCreateBinding(inflater, layoutRes, parent);
-            binding.getRoot().setTag(binding);
         } else {
-            binding = (ViewDataBinding) convertView.getTag();
+            binding = DataBindingUtil.getBinding(convertView);
         }
 
         T item = items.get(position);
@@ -175,9 +174,8 @@ public class BindingListViewAdapter<T> extends BaseAdapter implements BindingCol
             ViewDataBinding binding;
             if (convertView == null) {
                 binding = onCreateBinding(inflater, layoutRes, parent);
-                binding.getRoot().setTag(binding);
             } else {
-                binding = (ViewDataBinding) convertView.getTag();
+                binding = DataBindingUtil.getBinding(convertView);
             }
 
             T item = items.get(position);

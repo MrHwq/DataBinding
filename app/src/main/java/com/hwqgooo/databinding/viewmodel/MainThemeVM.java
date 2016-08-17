@@ -3,7 +3,7 @@ package com.hwqgooo.databinding.viewmodel;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
@@ -35,17 +35,17 @@ public class MainThemeVM extends BaseObservable implements IToolbarState {
     public String toolbarImage;
     private Context context;
     private int selectColor;
-    public final ReplyCommand<Bitmap> onSuccess = new ReplyCommand<Bitmap>(new Action1<Bitmap>() {
+    public final ReplyCommand<Drawable> onSuccess = new ReplyCommand<Drawable>(new Action1<Drawable>() {
         @Override
-        public void call(Bitmap bitmap) {
+        public void call(Drawable bitmap) {
             Observable.just(bitmap)
-                    .map(new Func1<Bitmap, Palette.Swatch>() {
+                    .map(new Func1<Drawable, Palette.Swatch>() {
                         @Override
-                        public Palette.Swatch call(Bitmap bitmap) {
-                            Palette palette = Palette.from(bitmap).generate();
-                            if (palette != null && palette.getMutedSwatch() != null) {
-                                return palette.getMutedSwatch();
-                            }
+                        public Palette.Swatch call(Drawable bitmap) {
+//                            Palette palette = Palette.from(bitmap).generate();
+//                            if (palette != null && palette.getMutedSwatch() != null) {
+//                                return palette.getMutedSwatch();
+//                            }
                             return null;
                         }
                     })

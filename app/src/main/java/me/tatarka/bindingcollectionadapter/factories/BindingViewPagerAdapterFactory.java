@@ -1,9 +1,9 @@
-package com.hwqgooo.databinding.bindingcollectionadapter.factories;
+package me.tatarka.bindingcollectionadapter.factories;
 
 import android.support.v4.view.ViewPager;
 
-import com.hwqgooo.databinding.bindingcollectionadapter.BindingViewPagerAdapter;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemViewArg;
+import me.tatarka.bindingcollectionadapter.BindingViewPagerAdapter;
+import me.tatarka.bindingcollectionadapter.ItemViewArg;
 
 public interface BindingViewPagerAdapterFactory {
     BindingViewPagerAdapterFactory DEFAULT = new BindingViewPagerAdapterFactory() {

@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter;
+package me.tatarka.bindingcollectionadapter;
 
 /**
  * You may extend this instead of {@link ItemViewSelector} if you do not need to implement {@link

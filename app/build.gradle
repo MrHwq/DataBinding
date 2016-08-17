@@ -57,7 +57,8 @@ def releaseTime() {
 }
 
 def getGitVersion() {
-    return 'git rev-parse --short HEAD'.execute().text.trim()
+    return '1.0'
+//    return 'git rev-parse --short HEAD'.execute().text.trim()
 }
 
 allprojects {

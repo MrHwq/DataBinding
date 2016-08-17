@@ -5,9 +5,10 @@ import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
 
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.model.bean.Girl;
+
+import me.tatarka.bindingcollectionadapter.ItemView;
 
 /**
  * Created by weiqiang on 2016/7/9.

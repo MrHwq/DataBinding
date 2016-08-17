@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter;
+package me.tatarka.bindingcollectionadapter;
 
 import android.databinding.ObservableList;
 import android.databinding.ViewDataBinding;

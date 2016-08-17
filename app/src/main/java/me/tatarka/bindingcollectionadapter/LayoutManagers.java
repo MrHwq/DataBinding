@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter;
+package me.tatarka.bindingcollectionadapter;
 
 import android.support.annotation.IntDef;
 import android.support.v7.widget.GridLayoutManager;

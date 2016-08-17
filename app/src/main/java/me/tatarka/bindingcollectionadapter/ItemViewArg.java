@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter;
+package me.tatarka.bindingcollectionadapter;
 
 /**
  * Unify {@link ItemView} and {@link ItemViewSelector} to simplify BindingAdapters.

@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.message.Messenger;
 import com.hwqgooo.databinding.model.CacheHttpClient;
@@ -17,6 +16,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import me.tatarka.bindingcollectionadapter.ItemView;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;

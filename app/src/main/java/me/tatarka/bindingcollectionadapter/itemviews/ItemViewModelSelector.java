@@ -1,8 +1,8 @@
-package com.hwqgooo.databinding.bindingcollectionadapter.itemviews;
+package me.tatarka.bindingcollectionadapter.itemviews;
 
 
-import com.hwqgooo.databinding.bindingcollectionadapter.BaseItemViewSelector;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
+import me.tatarka.bindingcollectionadapter.BaseItemViewSelector;
+import me.tatarka.bindingcollectionadapter.ItemView;
 
 /**
  * An {@link me.tatarka.bindingcollectionadapter.ItemViewSelector} that selects item views by

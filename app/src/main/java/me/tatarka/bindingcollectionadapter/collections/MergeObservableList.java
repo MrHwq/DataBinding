@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.bindingcollectionadapter.collections;
+package me.tatarka.bindingcollectionadapter.collections;
 
 import android.databinding.ListChangeRegistry;
 import android.databinding.ObservableList;

@@ -1,6 +1,7 @@
 package com.hwqgooo.databinding.command.recyclerview;
 
 import android.databinding.BindingAdapter;
+import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
@@ -31,15 +32,16 @@ public class ViewBindingAdapter {
 //    }
 
     @BindingAdapter({"onLoadMoreCommand"})
-    public static void onLoadMoreCommand(RecyclerView recyclerView, final ReplyCommand
-            onLoadMoreCommand) {
-        Log.d(TAG, "onLoadMoreCommand: ");
+    public static void onLoadMoreCommand(RecyclerView recyclerView,
+                                         final ReplyCommand onLoadMoreCommand) {
+        Log.d(TAG, "onLoadMoreCommand: " + recyclerView);
+        if (onLoadMoreCommand == null) {
+            return;
+        }
         recyclerView.addOnScrollListener(new OnRcvScrollListener() {
             @Override
             public void onBottom() {
-                if (onLoadMoreCommand != null) {
-                    onLoadMoreCommand.execute();
-                }
+                onLoadMoreCommand.execute();
             }
 
             @Override
@@ -52,13 +54,14 @@ public class ViewBindingAdapter {
     @BindingAdapter(value = {"onItemClickCommand"}, requireAll = false)
     public static void onItemClickCommand(final RecyclerView recyclerView,
                                           final ReplyCommand<Integer> onItemClickCommand) {
-
-        recyclerView.addOnItemTouchListener(new OnRcvClickListener(recyclerView) {
+        Log.d(TAG, "onItemClickCommand: " + recyclerView);
+        if (onItemClickCommand == null) {
+            return;
+        }
+        recyclerView.addOnItemTouchListener(new OnRcvClickListener() {
             @Override
-            public void onItemClick(RecyclerView.ViewHolder viewHolder, int position) {
-                if (onItemClickCommand != null) {
-                    onItemClickCommand.execute(position);
-                }
+            public void onItemClick(ViewDataBinding binding, int position) {
+                onItemClickCommand.execute(position);
             }
         });
     }

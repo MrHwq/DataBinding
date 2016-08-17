@@ -6,7 +6,6 @@ import android.util.Pair;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
 import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.model.CacheInterceptor;
 import com.hwqgooo.databinding.model.bean.Girl;
@@ -26,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import me.tatarka.bindingcollectionadapter.ItemView;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -199,6 +199,17 @@ public class MzituVM extends BaseGirlVM {
                         return getSubjectUrl(s);
                     }
                 })
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<List<Pair<String, String>>, List<Pair<String, String>>>() {
+                    @Override
+                    public List<Pair<String, String>> call(List<Pair<String, String>> pairs) {
+                        if (isRefresh) {
+                            girls.clear();
+                        }
+                        return pairs;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
                 .flatMap(new Func1<List<Pair<String, String>>, Observable<Pair<String, String>>>() {
                     @Override
                     public Observable<Pair<String, String>> call(List<Pair<String, String>> pairs) {
@@ -210,9 +221,6 @@ public class MzituVM extends BaseGirlVM {
                             subUrl = pairs.subList(1, pairs.size());
                         }
                         Log.d(TAG, "load suburl call: " + subUrl.size());
-                        if (isRefresh) {
-                            girls.clear();
-                        }
                         return Observable.just(pairs.get(0));
                     }
                 })

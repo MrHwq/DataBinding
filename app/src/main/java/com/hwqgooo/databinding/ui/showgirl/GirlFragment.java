@@ -3,11 +3,9 @@ package com.hwqgooo.databinding.ui.showgirl;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -16,7 +14,6 @@ import android.view.ViewGroup;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
-import com.hwqgooo.databinding.bindingcollectionadapter.BindingRecyclerViewAdapter;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
@@ -91,21 +88,15 @@ public class GirlFragment extends BaseFragment {
     }
 
     private void setRecyclerView() {
-        binding.girlView.addOnItemTouchListener(new OnRcvClickListener(binding.girlView) {
+        binding.girlView.addOnItemTouchListener(new OnRcvClickListener<ItemGirlBinding>() {
             @Override
-            public void onItemClick(RecyclerView.ViewHolder viewHolder, int position) {
-
+            public void onItemClick(ItemGirlBinding binding, int position) {
 //                GirlPhotoFragment fragment = new GirlPhotoFragment(context, girlVm.getGirls()
 // .get(position));
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-
-                BindingRecyclerViewAdapter.ViewHolder
-                        newViewHolder = (BindingRecyclerViewAdapter.ViewHolder) viewHolder;
-                ViewDataBinding binding = newViewHolder.binding;
-                ItemGirlBinding girlBind = (ItemGirlBinding) binding;
-                GirlPhotoActivity.launch(context, girlBind.girliv, position,
+                GirlPhotoActivity.launch(context, binding.girliv, position,
                         girlVm.getGirls().get(position));
             }
         });

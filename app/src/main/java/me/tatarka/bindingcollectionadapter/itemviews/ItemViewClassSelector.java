@@ -1,11 +1,11 @@
-package com.hwqgooo.databinding.bindingcollectionadapter.itemviews;
+package me.tatarka.bindingcollectionadapter.itemviews;
 
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemView;
-import com.hwqgooo.databinding.bindingcollectionadapter.ItemViewSelector;
+import me.tatarka.bindingcollectionadapter.ItemView;
+import me.tatarka.bindingcollectionadapter.ItemViewSelector;
 
 
 /**

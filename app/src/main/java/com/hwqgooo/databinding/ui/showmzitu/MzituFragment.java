@@ -2,10 +2,8 @@ package com.hwqgooo.databinding.ui.showmzitu;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -14,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
-import com.hwqgooo.databinding.bindingcollectionadapter.BindingRecyclerViewAdapter;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
@@ -66,9 +63,10 @@ public class MzituFragment extends BaseFragment {
 
     private void setRecyclerView() {
         binding.girlView.addOnItemTouchListener(
-                new OnRcvClickListener(binding.girlView) {
+                new OnRcvClickListener<ItemGirlBinding>() {
                     @Override
-                    public void onItemClick(RecyclerView.ViewHolder viewHolder, int position) {
+                    public void onItemClick(ItemGirlBinding binding, int position) {
+
 //                GirlPhotoFragment fragment = new GirlPhotoFragment();
 //                Bundle bundle = new Bundle();
 //                bundle.putParcelable("girl", mzituVM.getGirls().get(position));
@@ -77,11 +75,7 @@ public class MzituFragment extends BaseFragment {
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
 
-                        BindingRecyclerViewAdapter.ViewHolder
-                                newViewHolder = (BindingRecyclerViewAdapter.ViewHolder) viewHolder;
-                        ViewDataBinding binding = newViewHolder.binding;
-                        ItemGirlBinding girlBind = (ItemGirlBinding) binding;
-                        GirlPhotoActivity.launch(context, girlBind.girliv, position,
+                        GirlPhotoActivity.launch(context, binding.girliv, position,
                                 mzituVM.getGirls().get(position));
                     }
                 }
