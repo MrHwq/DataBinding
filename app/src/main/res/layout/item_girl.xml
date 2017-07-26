@@ -33,13 +33,15 @@
                 android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
+                android:src="@mipmap/downloads"
                 android:transitionName="@{girl.desc}"
                 app:uri="@{girl.url}"/>
-
+            <!---->
+            <!--android:background="?attr/selectableItemBackground"-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
+                android:background="@{girl.isRead == 1 ? @color/colorAccent : @color/colorPrimary}"
                 android:orientation="horizontal"
                 android:paddingBottom="10dp"
                 android:paddingLeft="10dp"

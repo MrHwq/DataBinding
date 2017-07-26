@@ -17,33 +17,35 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
+import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
-import com.hwqgooo.databinding.databinding.ActivityGirlPhotoBinding;
-import com.hwqgooo.databinding.model.bean.Girl;
+import com.hwqgooo.databinding.databinding.PagerGalleryBinding;
+import com.hwqgooo.databinding.viewmodel.MZituGalleryVM;
 
 import java.util.List;
 import java.util.Map;
 
+import me.tatarka.bindingcollectionadapter.ItemView;
+
 /**
  * Created by weiqiang on 2016/7/9.
  */
-public class GirlPhotoActivity extends AppCompatActivity {
+public class GirlPhotoGalleryActivity extends AppCompatActivity {
     final static String TAG = "GirlPhotoActivity";
-    ActivityGirlPhotoBinding binding;
-    Girl girl;
+    PagerGalleryBinding binding;
+
+    MZituGalleryVM vm;
     int index;
 
-    public static void launch(Context context, View childView, int position, Girl girl) {
-        final Intent intent = new Intent(context, GirlPhotoActivity.class);
+    public static void launch(Context context, View childView, int position, String desc) {
+        final Intent intent = new Intent(context, GirlPhotoGalleryActivity.class);
         intent.putExtra("index", position);
-        intent.putExtra("girl", girl);
 
-        Log.d(TAG, "onItemClick: " + girl.getDesc());
         final ActivityOptionsCompat options;
 
         if (Build.VERSION.SDK_INT >= 21) {
             options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    (Activity)context, childView, girl.getDesc());
+                    (Activity) context, childView, desc);
         } else {
             options = ActivityOptionsCompat.makeScaleUpAnimation(
                     childView, 0, 0, childView.getWidth(), childView.getHeight());
@@ -60,21 +62,17 @@ public class GirlPhotoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // inside your activity (if you did not enable transitions in your theme)
-//        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-// set an enter transition
-//        getWindow().setEnterTransition(new Explode());
-// set an exit transition
-//        getWindow().setExitTransition(new Explode());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setSharedElementEnterTransition(enterTransition());
             getWindow().setSharedElementReturnTransition(returnTransition());
         }
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_girl_photo);
-        Bundle bundle = getIntent().getExtras();
-        index = bundle.getInt("index");
-        girl = bundle.getParcelable("girl");
-        binding.setGirl(girl);
+        binding = DataBindingUtil.setContentView(this, R.layout.pager_gallery);
+        index = getIntent().getIntExtra("index", 0);
+        if (vm == null) {
+            vm = MZituGalleryVM.getInstance(null);
+        }
+        binding.setItem(vm);
+        binding.setItemView(ItemView.of(BR.girl, R.layout.activity_girl_photo));
         setEnterSharedElementCallback(new SharedElementCallback() {
             @Override
             public void onSharedElementStart(List<String> sharedElementNames, List<View>
@@ -95,6 +93,12 @@ public class GirlPhotoActivity extends AppCompatActivity {
             @Override
             public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                 Log.d(TAG, "onMapSharedElements: ");
+            }
+        });
+        binding.viewpager.post(new Runnable() {
+            @Override
+            public void run() {
+                binding.viewpager.setCurrentItem(index, false);
             }
         });
     }

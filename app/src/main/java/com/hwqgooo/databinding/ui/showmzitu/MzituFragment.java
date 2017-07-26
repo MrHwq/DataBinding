@@ -10,12 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
-import com.hwqgooo.databinding.ui.showgirlphoto.GirlPhotoActivity;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
 import com.hwqgooo.databinding.viewmodel.MzituVM;
 
@@ -23,11 +21,10 @@ import com.hwqgooo.databinding.viewmodel.MzituVM;
  * Created by weiqiang on 2016/7/9.
  */
 public class MzituFragment extends BaseFragment {
-    String TAG = "MzituFragment";
+    String TAG;
     FragmentGirlBinding binding;
     Context context;
     MzituVM mzituVM;
-    String title = "Mzitu";
 
     @Override
     public void onAttach(Context context) {
@@ -38,16 +35,13 @@ public class MzituFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
-    Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl, container, false);
         Bundle argument = getArguments();
-        title = argument.getString("title");
-        TAG = TAG + title;
-        mzituVM = MzituVM.getInstance(context, title);
-        Log.d(TAG, "onCreateView: " + title);
-        binding.setVariable(BR.basegirlvm, mzituVM);
-        binding.executePendingBindings();
-//        binding.setGirlvm(girlVm);
+        String subUrl = argument.getString("url");
+        TAG = getClass().getSimpleName() + subUrl;
+        mzituVM = MzituVM.getInstance(context, subUrl);
+        binding.setBasegirlvm(mzituVM);
         setSwipeRefreshLayout();
         setRecyclerView();
 
@@ -66,17 +60,17 @@ public class MzituFragment extends BaseFragment {
                 new OnRcvClickListener<ItemGirlBinding>() {
                     @Override
                     public void onItemClick(ItemGirlBinding binding, int position) {
-
 //                GirlPhotoFragment fragment = new GirlPhotoFragment();
 //                Bundle bundle = new Bundle();
-//                bundle.putParcelable("girl", mzituVM.getGirls().get(position));
+//                bundle.putParcelable("girl", mzituVM.getItems().get(position));
 //                fragment.setArguments(bundle);
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-
-                        GirlPhotoActivity.launch(context, binding.girliv, position,
-                                mzituVM.getGirls().get(position));
+                        MzituGalleryActivity.launch(context, binding.girliv,
+                                mzituVM.galleries.get(position));
+//                        GirlPhotoActivity.launch(context, binding.girliv, position,
+//                                mzituVM.getItems().get(position));
                     }
                 }
 
@@ -86,7 +80,7 @@ public class MzituFragment extends BaseFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(TAG, "onDetach: " + title);
+        Log.d(TAG, "onDetach: ");
         context = null;
         if (mzituVM != null) {
             if (!insave) {
@@ -140,16 +134,5 @@ public class MzituFragment extends BaseFragment {
                         24,
                         getResources().getDisplayMetrics()));
         mzituVM.onStart();
-    }
-
-    @Override
-    public String getTitle() {
-        Log.d(TAG, "getTitle: " + title);
-        return title;
-    }
-
-    @Override
-    public void setTitle(String title) {
-        this.title = title;
     }
 }

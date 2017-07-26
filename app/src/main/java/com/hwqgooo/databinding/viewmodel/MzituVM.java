@@ -1,14 +1,18 @@
 package com.hwqgooo.databinding.viewmodel;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.util.Pair;
 
 import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.command.ReplyCommand;
-import com.hwqgooo.databinding.model.CacheInterceptor;
+import com.hwqgooo.databinding.model.CacheHttpClient;
 import com.hwqgooo.databinding.model.bean.Girl;
+import com.hwqgooo.databinding.model.bean.GirlGallery;
+import com.hwqgooo.databinding.model.dao.DaoService;
+import com.hwqgooo.databinding.model.dao.GalleryORM;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -16,17 +20,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import me.tatarka.bindingcollectionadapter.ItemView;
-import okhttp3.Cache;
+import me.tatarka.bindingcollectionadapter.LayoutManagers;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -37,6 +39,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -45,13 +48,14 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class MzituVM extends BaseGirlVM {
     final String baseUrl = "http://www.mzitu.com/";
-    public String TAG = "MzituVM";
+    public String TAG = MzituVM.class.getSimpleName();
     CompositeSubscription compositeSubscription;
     String title;
     int page;
     OkHttpClient client;
     Context context;
     List<Pair<String, String>> subUrl;
+    public List<GirlGallery> galleries = new LinkedList<>();
 
     static MzituVM girlVM;
     static List<MzituVM> vms = new ArrayList<>();
@@ -65,19 +69,6 @@ public class MzituVM extends BaseGirlVM {
         MzituVM vm = new MzituVM(context, title);
         vms.add(vm);
         return vm;
-    }
-
-    public OkHttpClient provideOkHttpClient(Context context) {
-        Cache cache = new Cache(new File(context.getCacheDir(),
-                "HttpCache"), 1024 * 1024 * 100);
-        OkHttpClient newClient = new OkHttpClient().newBuilder()
-                .addNetworkInterceptor(new CacheInterceptor())
-                .cache(cache)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build();
-
-        return newClient;
     }
 
     private MzituVM(Context context, String title) {
@@ -114,17 +105,36 @@ public class MzituVM extends BaseGirlVM {
             @Override
             public void call(Integer integer) {
                 Log.d(TAG, "call: " + integer);
-                Log.d(TAG, "call: " + girls.get(integer).getDesc());
-                Log.d(TAG, "call: " + girls.get(integer).getUrl());
+                Log.d(TAG, "call: " + items.get(integer).getDesc());
+                Log.d(TAG, "call: " + items.get(integer).getUrl());
+                items.get(integer).setIsRead(1);
+                DaoService.getInstance().setRead(items.get(integer).getUrl())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new Subscriber<GalleryORM>() {
+                            @Override
+                            public void onCompleted() {
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                e.printStackTrace();
+                            }
+
+                            @Override
+                            public void onNext(GalleryORM galleryORM) {
+                            }
+                        });
+                ;
             }
         });
-        client = provideOkHttpClient(context);
+        client = CacheHttpClient.getOkHttpClient();
+        factory = LayoutManagers.staggeredGrid(2, LinearLayoutManager.VERTICAL);
     }
 
 
     @Override
     public void onStart() {
-        if (girls.isEmpty()) {
+        if (items.isEmpty()) {
             load(true);
         }
     }
@@ -132,7 +142,7 @@ public class MzituVM extends BaseGirlVM {
     @Override
     public void onDestory() {
         compositeSubscription.unsubscribe();
-        girls.clear();
+        items.clear();
         vms.remove(this);
     }
 
@@ -143,8 +153,59 @@ public class MzituVM extends BaseGirlVM {
 
     @Override
     public void onRestart(Context context) {
-        client = provideOkHttpClient(context);
     }
+
+    Observable<List<GirlGallery>> getGalleriesFromUrl() {
+        return Observable
+                .create(new Observable.OnSubscribe<String>() {
+                    @Override
+                    public void call(Subscriber<? super String> subscriber) {
+                        try {
+                            String url;
+                            if (page == 1) {
+                                url = baseUrl + title;
+                            } else {
+                                url = baseUrl + title + "/page/" + page;
+                            }
+                            Log.d(TAG, "call: " + url);
+                            Request request = new Request.Builder().url(url).build();
+                            Call call = client.newCall(request);
+                            Response response = call.execute();
+                            if (!response.isSuccessful()) {
+                                throw new Exception("okhttp execute fail");
+                            }
+                            Document document = Jsoup.parse(response.body().string());
+                            Elements elements = document.select("div[class=main-content]");
+                            subscriber.onNext(elements.html());
+                            subscriber.onCompleted();
+                        } catch (Exception e) {
+                            subscriber.onError(e);
+                        }
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<String, List<GirlGallery>>() {
+                    @Override
+                    public List<GirlGallery> call(String s) {
+                        return getSubjectUrl(s);
+                    }
+                });
+    }
+
+    Func2 resetRead = new Func2<List<GalleryORM>, List<GirlGallery>, List<GirlGallery>>() {
+        @Override
+        public List<GirlGallery> call(List<GalleryORM> galleryORMs,
+                                      List<GirlGallery> girlGalleries) {
+            for (GalleryORM galleryORM : galleryORMs) {
+                for (GirlGallery gallery : girlGalleries) {
+                    if (galleryORM.getGalleryUrl().equals(gallery.dataOriginal)) {
+                        gallery.isRead = true;
+                    }
+                }
+            }
+            return girlGalleries;
+        }
+    };
 
     private void load(final boolean isRefresh) {
         if (compositeSubscription != null && compositeSubscription.isUnsubscribed()) {
@@ -153,124 +214,126 @@ public class MzituVM extends BaseGirlVM {
         }
         isRefreshing.set(true);
         Log.d(TAG, "load: " + title + "..." + page);
-        if (!isRefresh && subUrl != null && !subUrl.isEmpty()) {
-            Pair<String, String> pair = subUrl.get(0);
-            subUrl.remove(0);
-            Log.d(TAG, "load: " + pair.first + "..." + pair.second);
-            getSuburl(pair);
-            return;
-        }
-        compositeSubscription.add(Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                try {
-                    String url;
-                    if (page == 1) {
-                        url = baseUrl + title;
-                    } else {
-                        url = baseUrl + title + "/page/" + page;
-                    }
-                    Log.d(TAG, "call: " + url);
-                    Request request = new Request.Builder().url(url).build();
-                    Call call = client.newCall(request);
-                    Response response = call.execute();
-                    if (!response.isSuccessful()) {
-                        throw new Exception("okhttp execute fail");
-                    }
 
-//                    Document document = Jsoup.connect(url)
-//                            .userAgent("Mozilla")
-//                            .timeout(8000)
-//                                    .get();
-                    Document document = Jsoup.parse(response.body().string());
-                    Elements elements = document.select
-                            ("div[class=main-content]");
-                    subscriber.onNext(elements.html());
-                    subscriber.onCompleted();
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .map(new Func1<String, List<Pair<String, String>>>() {
-                    @Override
-                    public List<Pair<String, String>> call(String s) {
-                        return getSubjectUrl(s);
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<List<Pair<String, String>>, List<Pair<String, String>>>() {
-                    @Override
-                    public List<Pair<String, String>> call(List<Pair<String, String>> pairs) {
-                        if (isRefresh) {
-                            girls.clear();
-                        }
-                        return pairs;
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .flatMap(new Func1<List<Pair<String, String>>, Observable<Pair<String, String>>>() {
-                    @Override
-                    public Observable<Pair<String, String>> call(List<Pair<String, String>> pairs) {
-                        if (pairs.isEmpty()) {
-                            return Observable.error(new Throwable("load pairs is null"));
-                        }
-                        Log.d(TAG, "load pair call: " + pairs.size());
-                        if (pairs.size() > 1) {
-                            subUrl = pairs.subList(1, pairs.size());
-                        }
-                        Log.d(TAG, "load suburl call: " + subUrl.size());
-                        return Observable.just(pairs.get(0));
-                    }
-                })
-                .filter(new Func1<Pair<String, String>, Boolean>() {
-                    @Override
-                    public Boolean call(Pair<String, String> stringStringPair) {
-                        if (stringStringPair.first.startsWith("http")) {
-                            return Boolean.TRUE;
-                        }
-                        Log.d(TAG, "load call: " + stringStringPair.first);
-                        return Boolean.FALSE;
-                    }
-                })
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        isRefreshing.set(false);
-                    }
-                })
-                .doOnCompleted(new Action0() {
-                    @Override
-                    public void call() {
-                        ++page;
-                    }
-                })
-                .subscribe(new Subscriber<Pair<String, String>>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+        compositeSubscription.add(
+                Observable.zip(DaoService.getInstance().getCovers(), getGalleriesFromUrl(),
+                        resetRead)
+                        .subscribeOn(Schedulers.io())
+                        .map(new Func1<List<GirlGallery>, List<Girl>>() {
+                            @Override
+                            public List<Girl> call(List<GirlGallery> girlGalleries) {
+                                if (isRefresh) {
+                                    galleries.clear();
+                                }
+                                galleries.addAll(girlGalleries);
+                                List<Girl> girlList = new LinkedList<Girl>();
+                                for (GirlGallery girlGallery : girlGalleries) {
+                                    girlList.add(new Girl(girlGallery.desc,
+                                            girlGallery.dataOriginal, girlGallery.isRead));
+                                }
+                                return girlList;
+                            }
+                        })
+                        .doAfterTerminate(new Action0() {
+                            @Override
+                            public void call() {
+                                isRefreshing.set(false);
+                            }
+                        })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<List<Girl>>() {
+                            @Override
+                            public void onCompleted() {
+                                ++page;
+                            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        error(e);
-                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                error(e);
+                            }
 
-                    @Override
-                    public void onNext(Pair<String, String> pair) {
-                        Log.d(TAG, "onNext: " + pair.first + "..." + pair.second);
-                        getSuburl(pair);
-                    }
-                }));
+                            @Override
+                            public void onNext(List<Girl> girlList) {
+                                if (isRefresh) {
+                                    items.clear();
+                                }
+                                items.addAll(girlList);
+                            }
+                        }));
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .map(new Func1<List<Pair<String, String>>, List<Pair<String, String>>>() {
+//                    @Override
+//                    public List<Pair<String, String>> call(List<Pair<String, String>> pairs) {
+//                        if (isRefresh) {
+//                            items.clear();
+//                        }
+//                        return pairs;
+//                    }
+//                })
+//                .subscribeOn(Schedulers.io())
+//                .flatMap(new Func1<List<Pair<String, String>>, Observable<Pair<String,
+// String>>>() {
+//                    @Override
+//                    public Observable<Pair<String, String>> call(List<Pair<String, String>>
+// pairs) {
+//                        if (pairs.isEmpty()) {
+//                            return Observable.error(new Throwable("load pairs is null"));
+//                        }
+//                        Log.d(TAG, "load pair call: " + pairs.size());
+//                        if (pairs.size() > 1) {
+//                            subUrl = pairs.subList(1, pairs.size());
+//                        }
+//                        Log.d(TAG, "load suburl call: " + subUrl.size());
+//                        return Observable.just(pairs.get(0));
+//                    }
+//                })
+//                .filter(new Func1<Pair<String, String>, Boolean>() {
+//                    @Override
+//                    public Boolean call(Pair<String, String> stringStringPair) {
+//                        if (stringStringPair.first.startsWith("http")) {
+//                            return Boolean.TRUE;
+//                        }
+//                        Log.d(TAG, "load call: " + stringStringPair.first);
+//                        return Boolean.FALSE;
+//                    }
+//                })
+//                .doOnError(new Action1<Throwable>() {
+//                    @Override
+//                    public void call(Throwable throwable) {
+//                        isRefreshing.set(false);
+//                    }
+//                })
+//                .doOnCompleted(new Action0() {
+//                    @Override
+//                    public void call() {
+//                        ++page;
+//                    }
+//                })
+//                .subscribe(new Subscriber<Pair<String, String>>() {
+//                    @Override
+//                    public void onCompleted() {
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        error(e);
+//                    }
+//
+//                    @Override
+//                    public void onNext(Pair<String, String> pair) {
+//                        Log.d(TAG, "onNext: " + pair.first + "..." + pair.second);
+//                        getSuburl(pair);
+//                    }
+//                }));
     }
 
-    List<Pair<String, String>> getSubjectUrl(final String tophtml) {
+    List<GirlGallery> getSubjectUrl(final String tophtml) {
         Document doc = Jsoup.parse(tophtml);
         Elements table = doc.select("ul[id=pins]");
         if (table.size() == 0) {
             return null;
         }
-        List<Pair<String, String>> subjectUrl = new LinkedList<>();
+        List<GirlGallery> subjectUrl = new LinkedList<>();
         for (Element e : table) {
             for (Element child : e.children()) {
                 Elements href = child.select("a");
@@ -278,11 +341,17 @@ public class MzituVM extends BaseGirlVM {
                     continue;
                 }
                 Elements subhref = href.select("a");
+
                 Element sube = subhref.last();
 //                Log.d(TAG, "getSubjectUrl: " + subhref.outerHtml());
 //                Log.d(TAG, "call: " + sube.attr("href"));
 //                Log.d(TAG, "call: " + sube.text());
-                subjectUrl.add(new Pair<String, String>(sube.attr("href"), sube.text()));
+                Elements img = href.select("img");
+//                Log.d(TAG, "getSubjectUrl: " + img.outerHtml());
+//                Log.d(TAG, "getSubjectUrl: " + img.attr("src"));
+//                Log.d(TAG, "getSubjectUrl: " + img.attr("data-original"));
+                subjectUrl.add(new GirlGallery(sube.text(), img.attr("data-original"),
+                        sube.attr("href")));
             }
         }
 
@@ -303,136 +372,5 @@ public class MzituVM extends BaseGirlVM {
         } else {
             e.printStackTrace();
         }
-    }
-
-    //获取girl列表
-    void getSuburl(final Pair<String, String> pair) {
-        compositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
-                    @Override
-                    public void call(Subscriber<? super Integer> subscriber) {
-                        try {
-                            Request request = new Request.Builder().url(pair.first).build();
-                            Call call = client.newCall(request);
-                            Response response = call.execute();
-                            if (!response.isSuccessful()) {
-                                throw new Exception("okhttp execute fail");
-                            }
-                            Document document = Jsoup.parse(response.body().string());
-
-//                            Document document = Jsoup.connect(pair.first)
-//                                    .userAgent("Mozilla")
-//                                    .timeout(8000)
-//                                            .get();
-                            Elements elements = document.select
-                                    ("div[class=pagenavi]");
-//                                    Log.d(TAG, "call: " + elements.html());
-                            Elements suburl = elements.select("a");
-                            if (suburl.size() - 2 >= 0) {
-                                Element e = suburl.get(suburl.size() - 2);
-                                subscriber.onNext(Integer.valueOf(e.text()));
-                                subscriber.onCompleted();
-                            }
-                        } catch (Exception e) {
-                            subscriber.onError(e);
-                        }
-                    }
-                })
-                        .subscribeOn(Schedulers.io())
-                        .map(new Func1<Integer, List<String>>() {
-                            @Override
-                            public List<String> call(Integer integer) {
-                                List<String> urls = new LinkedList<String>();
-                                int all = integer.intValue();
-                                urls.add(pair.first);
-                                for (int idx = 2; idx <= all; ++idx) {
-                                    urls.add(pair.first + "/" + Integer.toString(idx));
-                                }
-                                return urls;
-                            }
-                        })
-                        .flatMap(new Func1<List<String>, Observable<String>>() {
-                            @Override
-                            public Observable<String> call(List<String> strings) {
-                                return Observable.from(strings);
-                            }
-                        })
-                        .doAfterTerminate(new Action0() {
-                            @Override
-                            public void call() {
-                                isRefreshing.set(false);
-                            }
-                        })
-                        .subscribe(new Subscriber<String>() {
-                            @Override
-                            public void onCompleted() {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                error(e);
-                            }
-
-                            @Override
-                            public void onNext(String string) {
-                                getGirl(string);
-                            }
-                        })
-        );
-    }
-
-    void getGirl(final String url) {
-        compositeSubscription.add(Observable.create(new Observable.OnSubscribe<Girl>() {
-                    @Override
-                    public void call(Subscriber<? super Girl> subscriber) {
-                        try {
-                            Request request = new Request.Builder().url(url).build();
-                            Call call = client.newCall(request);
-                            Response response = call.execute();
-                            if (!response.isSuccessful()) {
-                                throw new Exception("okhttp execute fail");
-                            }
-                            Document document = Jsoup.parse(response.body().string());
-
-//                                    Document document = Jsoup.connect(url)
-//                                            .userAgent("Mozilla")
-//                                            .timeout(8000)
-//                                            .get();
-                            Elements elements = document.select
-                                    ("div[class=main-image]");
-//                                    Log.d(TAG, "call: " + elements.html());
-                            Elements suburl = elements.select("img");
-//                                    Log.d(TAG, "call: " + suburl.attr("src"));
-//                                    Log.d(TAG, "call: " + suburl.attr("alt"));
-                            subscriber.onNext(new Girl(suburl.attr("alt"), suburl.attr("src")));
-                            subscriber.onCompleted();
-                        } catch (Exception e) {
-                            subscriber.onError(e);
-                        }
-                    }
-                })
-                        .subscribeOn(Schedulers.io())
-                        .doOnTerminate(new Action0() {
-                            @Override
-                            public void call() {
-                                isRefreshing.set(false);
-                            }
-                        })
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Girl>() {
-                            @Override
-                            public void onCompleted() {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                error(e);
-                            }
-
-                            @Override
-                            public void onNext(Girl girl) {
-                                girls.add(girl);
-                            }
-                        })
-        );
     }
 }

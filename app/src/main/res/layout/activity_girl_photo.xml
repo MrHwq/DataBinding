@@ -5,12 +5,6 @@
 
     <data>
 
-        <import type="com.hwqgooo.databinding.viewmodel.MainThemeVM"/>
-
-        <variable
-            name="mainthemevm"
-            type="MainThemeVM"/>
-
         <import type="com.hwqgooo.databinding.model.bean.Girl"/>
 
         <variable
@@ -38,7 +32,7 @@
         android:adjustViewBounds="true"
         android:fitsSystemWindows="true"
         android:scaleType="fitCenter"
+        android:src="@mipmap/downloads"
         android:transitionName="@{girl.desc}"
-        app:statusbarcolor="@{mainthemevm.selectColor}"
         app:uri="@{girl.url}"/>
 </layout>

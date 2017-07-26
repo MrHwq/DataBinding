@@ -1,6 +1,7 @@
 package com.hwqgooo.databinding.viewmodel;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 
 import com.hwqgooo.databinding.BR;
@@ -17,6 +18,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import me.tatarka.bindingcollectionadapter.ItemView;
+import me.tatarka.bindingcollectionadapter.LayoutManagers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -33,7 +35,7 @@ import rx.schedulers.Schedulers;
  * Created by weiqiang on 2016/7/4.
  */
 public class GirlVM extends BaseGirlVM {
-    public static final String TAG = "GirlVM";
+    public static final String TAG = GirlVM.class.getSimpleName();
     final String baseUrl = "http://gank.io/api/";
     Retrofit mRetrofit;
     IGirlService girlService;
@@ -53,7 +55,7 @@ public class GirlVM extends BaseGirlVM {
         this.context = context;
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
-                .client(CacheHttpClient.getOkHttpClient(context))
+                .client(CacheHttpClient.getOkHttpClient())
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
@@ -92,16 +94,18 @@ public class GirlVM extends BaseGirlVM {
             @Override
             public void call(Integer integer) {
                 Log.d(TAG, "call: " + integer);
-                Log.d(TAG, "call: " + girls.get(integer).getDesc());
-                Log.d(TAG, "call: " + girls.get(integer).getUrl());
+                Log.d(TAG, "call: " + items.get(integer).getDesc());
+                Log.d(TAG, "call: " + items.get(integer).getUrl());
             }
         });
+        factory = LayoutManagers.staggeredGrid(2, LinearLayoutManager.VERTICAL);
+//        factory = LayoutManagers.linear(LinearLayoutManager.HORIZONTAL, false);
     }
 
     @Override
     public void onStart() {
-        if (girls.isEmpty()) {
-            load(true);
+        if (items.isEmpty()) {
+            onRefresh.execute();
         }
     }
 
@@ -111,7 +115,7 @@ public class GirlVM extends BaseGirlVM {
             subscription.unsubscribe();
             subscription = null;
         }
-        girls.clear();
+        items.clear();
         girlVM = null;
     }
 
@@ -125,20 +129,20 @@ public class GirlVM extends BaseGirlVM {
 
     @Override
     public void onRestart(Context context) {
-        if (this.context == context) {
-            return;
-        }
-        mRetrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(CacheHttpClient.getOkHttpClient(context))
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
-        girlService = mRetrofit.create(IGirlService.class);
+//        if (this.context == context) {
+//            return;
+//        }
+//        mRetrofit = new Retrofit.Builder()
+//                .baseUrl(baseUrl)
+//                .client(CacheHttpClient.getOkHttpClient())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+//                .build();
+//        girlService = mRetrofit.create(IGirlService.class);
     }
 
     private void load(final boolean isRefresh) {
-        Log.d(TAG, "load: " + isRefresh);
+        Log.d(TAG, "load:" + isRefresh + " ,page:" + page);
         isRefreshing.set(true);
         final Observable<GirlData> observable = girlService.getGirls(page);
         subscription = observable
@@ -159,7 +163,7 @@ public class GirlVM extends BaseGirlVM {
                 .subscribe(new Subscriber<List<Girl>>() {
                     @Override
                     public void onCompleted() {
-                        Log.d(TAG, isRefresh ? "onRefresh" : "onLoadMore" + " onCompleted: ");
+                        Log.d(TAG, (isRefresh ? "onRefresh" : "onLoadMore") + " onCompleted: ");
                         page++;
                     }
 
@@ -181,15 +185,18 @@ public class GirlVM extends BaseGirlVM {
                     public void onNext(List<Girl> girlList) {
                         try {
                             Log.d(TAG, "onNext: " + girlList.size());
+                            for (Girl girl : girlList) {
+                                Log.d(TAG, "onNext: " + girl.getDesc());
+                            }
                             if (isRefresh) {
-                                girls.clear();
+                                items.clear();
                             }
 
                             Messenger.getDefault().send(
                                     girlList.get((int) (girlList.size() * Math.random())).getUrl(),
                                     MainThemeVM.TOKEN_UPDATE_INDICATOR);
-//                            int pos = girls.size();
-                            girls.addAll(girlList);
+//                            int pos = items.size();
+                            items.addAll(girlList);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

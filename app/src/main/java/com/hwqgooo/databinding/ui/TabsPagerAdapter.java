@@ -3,9 +3,6 @@ package com.hwqgooo.databinding.ui;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
-
-import com.hwqgooo.databinding.ui.fragment.BaseFragment;
 
 import java.util.List;
 
@@ -15,15 +12,16 @@ import java.util.List;
 public class TabsPagerAdapter extends FragmentPagerAdapter {
     public final static String TAG = "TabsPagerAdapter";
     List<Fragment> lists;
+    String[] titles;
 
-    public TabsPagerAdapter(FragmentManager fm, List<Fragment> lists) {
+    public TabsPagerAdapter(FragmentManager fm, List<Fragment> lists, String[] titles) {
         super(fm);
         this.lists = lists;
+        this.titles = titles;
     }
 
     @Override
     public Fragment getItem(int position) {
-        Log.d(TAG, "getItem: " + position);
         return lists != null ? lists.get(position) : null;
     }
 
@@ -34,12 +32,6 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        try {
-            BaseFragment fragment = (BaseFragment) lists.get(position);
-            return fragment.getTitle();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return super.getPageTitle(position);
-        }
+        return titles[position];
     }
 }

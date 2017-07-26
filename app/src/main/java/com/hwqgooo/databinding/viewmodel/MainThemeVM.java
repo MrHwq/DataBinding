@@ -23,7 +23,7 @@ import rx.functions.Func1;
  * Created by weiqiang on 2016/7/3.
  */
 public class MainThemeVM extends BaseObservable implements IToolbarState {
-    public final static String TAG = "MainThemeVM";
+    public final static String TAG = MainThemeVM.class.getSimpleName();
     public static final String TOKEN_UPDATE_INDICATOR = "TOKEN_MainThemeVM";
     static MainThemeVM instance;
     public final ReplyCommand onClick = new ReplyCommand(new Action0() {

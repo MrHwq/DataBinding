@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.0'
     dataBinding {
         enabled true
     }
     defaultConfig {
         applicationId "com.hwqgooo.databinding"
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 1
         versionName "${getGitVersion()}"
         buildConfigField "String", "GIT_REVISION", "\"${getGitVersion()}\""
@@ -26,9 +26,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    flavorDimensions "xiaomi"
     productFlavors {
 //        develop {}
-        xiaomi {}
+        xiaomi {
+            dimension "xiaomi"
+        }
 //        huawei {}
 //        anzhi {}
     }
@@ -38,7 +41,7 @@ android {
             def oldFile = output.outputFile
 //            if (variant.buildType.name.equals('release')) {
             def releaseApkName = 'girl.' + variant.productFlavors[0].name + "." + defaultConfig.versionName + ".${getReleaseApkName()}" + '.apk'
-            output.outputFile = new File(oldFile.parent, releaseApkName)
+//            output.outputFile = new File(oldFile.parent, releaseApkName)
 //            }
         }
     }
@@ -67,14 +70,29 @@ allprojects {
     }
 }
 
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral() // add repository
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha8'
+        classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2' // add plugin
+    }
+}
+
+// In your app projects build.gradle file:
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'org.jsoup:jsoup:1.9.2'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:cardview-v7:23.4.0'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.android.support:palette-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:cardview-v7:25.0.0'
+    compile 'com.android.support:recyclerview-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
+    compile 'com.android.support:palette-v7:25.0.0'
     /*recyclerview分隔符*/
     compile 'com.yqritc:recyclerview-flexibledivider:1.2.9'
     /*retrofit及格式转换*/
@@ -88,12 +106,18 @@ dependencies {
     /*rxjava*/
     compile 'io.reactivex:rxandroid:1.2.0'
     compile 'io.reactivex:rxjava:1.1.5'
-    /*圆形imageview*/
+    /* 圆形imageview */
 //    compile 'de.hdodenhof:circleimageview:2.0.0'
-    /*打标签库*/
+    /* 打标签库 */
     compile 'me.gujun.android.taggroup:library:1.4@aar'
     compile 'com.github.lawloretienne:discreteslider:0.0.6'
     //
 //    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter:1.2.0'
 //    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter-recyclerview:1.2.0'
+    /* leakcanary */
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    /* sql */
+    compile 'org.greenrobot:greendao:3.2.2'
 }

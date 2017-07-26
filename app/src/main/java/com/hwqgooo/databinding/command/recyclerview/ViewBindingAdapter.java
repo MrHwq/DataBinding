@@ -15,7 +15,6 @@ import com.hwqgooo.databinding.utils.recyclerview.OnRcvScrollListener;
 public class ViewBindingAdapter {
     public static final String TAG = "RcvViewBindingAdapter";
 
-
 //    @BindingAdapter({"itemView", "viewModels"})
 //    public static void addViews(ViewGroup viewGroup,
 //                                final ItemView itemView,

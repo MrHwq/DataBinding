@@ -39,21 +39,31 @@ public class CacheHttpClient {
             }
         }
     };
+    private RetryIntercepter retryIntercepter = new RetryIntercepter(3);
 
-    Context context;
     private OkHttpClient mOkHttpClient;
+    private Cache cache;
     static CacheHttpClient client;
+    static Context context;
 
-    private CacheHttpClient(Context context) {
-        this.context = context;
+    private CacheHttpClient() {
         initOkHttpClient();
     }
 
-    public static OkHttpClient getOkHttpClient(Context context) {
+    public static OkHttpClient getOkHttpClient() {
         if (client == null) {
-            client = new CacheHttpClient(context);
+            client = new CacheHttpClient();
         }
         return client.mOkHttpClient;
+    }
+
+    public static void initCacheHttpClient(Context context) {
+        CacheHttpClient.context = context;
+    }
+
+    public static void destoryCacheHttpClient() {
+        CacheHttpClient.client = null;
+        CacheHttpClient.context = null;
     }
 
     /**
@@ -67,15 +77,15 @@ public class CacheHttpClient {
             synchronized (CacheHttpClient.class) {
                 if (mOkHttpClient == null) {
                     //设置Http缓存
-                    Cache cache = new Cache(new File(context.getCacheDir(),
+                    cache = new Cache(new File(context.getCacheDir(),
                             "HttpCache"), 1024 * 1024 * 100);
 
                     mOkHttpClient = new OkHttpClient.Builder()
                             .cache(cache)
                             .addInterceptor(mRewriteCacheControlInterceptor)
+                            .addInterceptor(retryIntercepter)
                             .addNetworkInterceptor(mRewriteCacheControlInterceptor)
-//                            .addInterceptor(interceptor)
-                            .retryOnConnectionFailure(true)
+//                            .retryOnConnectionFailure(true)
                             .connectTimeout(15, TimeUnit.SECONDS)
                             .build();
                 }

@@ -13,7 +13,6 @@ public class CacheInterceptor implements Interceptor {
     public CacheInterceptor() {
     }
 
-
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();

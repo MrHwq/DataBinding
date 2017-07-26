@@ -1,28 +1,31 @@
 package com.hwqgooo.databinding.ui.showgirl;
 
-
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
-import com.hwqgooo.databinding.ui.showgirlphoto.GirlPhotoActivity;
+import com.hwqgooo.databinding.utils.recyclerview.FirstItemSnapHelper;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
 import com.hwqgooo.databinding.viewmodel.GirlVM;
 
 import java.util.List;
 import java.util.Map;
+
+import me.tatarka.bindingcollectionadapter.LayoutManagers;
 
 /**
  * Created by weiqiang on 2016/7/2.
@@ -32,6 +35,7 @@ public class GirlFragment extends BaseFragment {
     FragmentGirlBinding binding;
     Context context;
     GirlVM girlVm;
+    SnapHelper snapHelper = new FirstItemSnapHelper();
 
     @Override
     public void onAttach(Context context) {
@@ -43,12 +47,9 @@ public class GirlFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
-    Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl,
-                container, false);
-        binding.setVariable(BR.basegirlvm, girlVm);
-        binding.executePendingBindings();
-//        binding.setGirlvm(girlVm);
+            Bundle savedInstanceState) {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl, container, false);
+        binding.setBasegirlvm(girlVm);
         setSwipeRefreshLayout();
         setRecyclerView();
 
@@ -87,19 +88,42 @@ public class GirlFragment extends BaseFragment {
                 android.R.color.holo_orange_dark);
     }
 
+    boolean isGrid = true;
+
     private void setRecyclerView() {
         binding.girlView.addOnItemTouchListener(new OnRcvClickListener<ItemGirlBinding>() {
             @Override
-            public void onItemClick(ItemGirlBinding binding, int position) {
-//                GirlPhotoFragment fragment = new GirlPhotoFragment(context, girlVm.getGirls()
+            public void onItemClick(ItemGirlBinding itemGirlBinding, int position) {
+//                GirlPhotoFragment fragment = new GirlPhotoFragment(context, girlVm.getItems()
 // .get(position));
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-                GirlPhotoActivity.launch(context, binding.girliv, position,
-                        girlVm.getGirls().get(position));
+//                GirlPhotoActivity.launch(context, binding.girliv, position,
+//                        girlVm.getItems().get(position));
+                Log.d(TAG, "click-------------------------");
+                RecyclerView.Adapter adapter = binding.girlView.getAdapter();
+//                binding.girlView.setAdapter(null);
+//                binding.girlView.setLayoutManager(null);
+                RecyclerView.LayoutManager layoutManager = binding.girlView.getLayoutManager();
+                if (isGrid) {
+                    isGrid = false;
+                    Log.d(TAG, "grid to liner");
+                    snapHelper.attachToRecyclerView(binding.girlView);
+                    girlVm.factory = LayoutManagers.linear(LinearLayoutManager.HORIZONTAL, false);
+                } else {
+                    isGrid = true;
+                    Log.d(TAG, "liner to grid");
+                    snapHelper.attachToRecyclerView(null);
+                    girlVm.factory = LayoutManagers.staggeredGrid(2, LinearLayoutManager.VERTICAL);
+                }
+
+//                binding.girlView.setAdapter(adapter);
+                binding.girlView.setLayoutManager(girlVm.factory.create(binding.girlView));
+//                adapter.notifyDataSetChanged();
             }
         });
+//        snapHelper.attachToRecyclerView(binding.girlView);
     }
 
     @Override
@@ -153,14 +177,5 @@ public class GirlFragment extends BaseFragment {
                         24,
                         getResources().getDisplayMetrics()));
         girlVm.onStart();
-    }
-
-    @Override
-    public String getTitle() {
-        return "Girl";
-    }
-
-    @Override
-    public void setTitle(String title) {
     }
 }

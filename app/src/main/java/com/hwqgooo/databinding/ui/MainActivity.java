@@ -6,17 +6,21 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.ActivityMainBinding;
 import com.hwqgooo.databinding.ui.showgirl.GirlFragment;
+import com.hwqgooo.databinding.ui.showmzitu.MzituFragment;
 import com.hwqgooo.databinding.viewmodel.IToolbarState;
 import com.hwqgooo.databinding.viewmodel.MainThemeVM;
 
@@ -40,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         binding.setMainthemevm(vm);
         binding.setOnOffsetChangedListener(new OnMyOffsetChangedListener());
         initTab();
+        binding.navView.setNavigationItemSelectedListener(new OnNavigationItemSelectedListener());
     }
 
     @Override
@@ -71,19 +76,17 @@ public class MainActivity extends AppCompatActivity {
     void initTab() {
         final List<Fragment> lists = new LinkedList<>();
         lists.add(new GirlFragment());
-//        String[] titles = {"xinggan", "japan", "taiwan", "mm"};
-//        for (String title : titles) {
-//            Bundle bundle = new Bundle();
-//            String mziTitle = title;
-//            Log.d(TAG, "initTab: " + title + ".." + mziTitle);
-//            bundle.putString("title", mziTitle);
-//            MzituFragment fragment = new MzituFragment();
-//            fragment.setArguments(bundle);
-//            fragment.setTitle(title);
-//            lists.add(fragment);
-//        }
+        String[] subUrls = {"xinggan", "japan", /*"taiwan",*/ "mm"};
+        for (int i = 0; i < subUrls.length; ++i) {
+            Bundle bundle = new Bundle();
+            bundle.putString("url", subUrls[i]);
+            MzituFragment fragment = new MzituFragment();
+            fragment.setArguments(bundle);
+            lists.add(fragment);
+        }
 
-        TabsPagerAdapter tabs = new TabsPagerAdapter(getSupportFragmentManager(), lists);
+        String[] titles = {"妹子", "性感", "日本", /*"台湾",*/ "清纯"};
+        TabsPagerAdapter tabs = new TabsPagerAdapter(getSupportFragmentManager(), lists, titles);
         binding.viewpager.setAdapter(tabs);
         binding.tablayout.setupWithViewPager(binding.viewpager);
     }
@@ -115,6 +118,16 @@ public class MainActivity extends AppCompatActivity {
                     state.setToolbarState(IToolbarState.INTERNEDIATE);
                 }
             }
+        }
+    }
+
+    class OnNavigationItemSelectedListener implements NavigationView
+            .OnNavigationItemSelectedListener {
+        @Override
+        public boolean onNavigationItemSelected(MenuItem item) {
+//            selectFragment(item.getItemId());
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
         }
     }
 }

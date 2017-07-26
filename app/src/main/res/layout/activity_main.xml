@@ -21,81 +21,95 @@
 
     </data>
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        app:statusbarcolor="@{mainthemevm.selectColor}">
-
-        <android.support.design.widget.AppBarLayout
+        tools:openDrawer="start">
+        <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:addOnOffsetChangedListener="@{onOffsetChangedListener}"
-            app:elevation="3dp">
+            app:statusbarcolor="@{mainthemevm.selectColor}">
 
-            <android.support.design.widget.CollapsingToolbarLayout
+            <android.support.design.widget.AppBarLayout
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
-                app:contentScrim="@color/colorPrimary"
-                app:expandedTitleMarginEnd="64dp"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-                app:statusBarScrim="@android:color/transparent"
-                app:title="@{mainthemevm.toolbarTitle}">
-                <!--   exitUntilCollapsed -->
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:addOnOffsetChangedListener="@{onOffsetChangedListener}"
+                app:elevation="3dp">
 
-                <ImageView
+                <android.support.design.widget.CollapsingToolbarLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    app:clickCommand="@{mainthemevm.onClick}"
-                    app:layout_collapseMode="parallax"
-                    app:onSuccessCommand="@{mainthemevm.onSuccess}"
-                    app:uri="@{mainthemevm.toolbarImage}"/>
+                    android:layout_height="180dp"
+                    android:fitsSystemWindows="true"
+                    app:contentScrim="@color/colorPrimary"
+                    app:expandedTitleMarginEnd="64dp"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                    app:statusBarScrim="@android:color/transparent"
+                    app:title="@{mainthemevm.toolbarTitle}">
+                    <!--   exitUntilCollapsed -->
 
-                <android.support.v7.widget.Toolbar
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                    android:title="R R"
-                    android:titleTextColor="@android:color/black"
-                    app:layout_collapseMode="parallax"
-                    app:layout_scrollFlags="scroll|enterAlways"
-                    app:popupTheme="@style/AlertDialog.AppCompat.Light">
-                </android.support.v7.widget.Toolbar>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        app:clickCommand="@{mainthemevm.onClick}"
+                        app:layout_collapseMode="parallax"
+                        app:onSuccessCommand="@{mainthemevm.onSuccess}"
+                        app:uri="@{mainthemevm.toolbarImage}"/>
 
-                <android.support.design.widget.TabLayout
-                    android:id="@+id/tablayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_gravity="bottom"
-                    android:background="@{mainthemevm.selectColor}"/>
-            </android.support.design.widget.CollapsingToolbarLayout>
-        </android.support.design.widget.AppBarLayout>
+                    <android.support.v7.widget.Toolbar
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                        android:title="R R"
+                        android:titleTextColor="@android:color/black"
+                        app:layout_collapseMode="parallax"
+                        app:layout_scrollFlags="scroll|enterAlways"
+                        app:popupTheme="@style/AlertDialog.AppCompat.Light">
+                    </android.support.v7.widget.Toolbar>
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/viewpager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/content_bar"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                    <android.support.design.widget.TabLayout
+                        android:id="@+id/tablayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_gravity="bottom"
+                        android:background="@{mainthemevm.selectColor}"/>
+                </android.support.design.widget.CollapsingToolbarLayout>
+            </android.support.design.widget.AppBarLayout>
 
-        <!--<com.etiennelawlor.discreteslider.library.ui.DiscreteSlider-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="64dp"-->
-        <!--android:layout_gravity="bottom"-->
-        <!--android:background="@color/colorPrimary"-->
-        <!--android:paddingLeft="8dp"-->
-        <!--android:paddingRight="8dp"-->
-        <!--app:backdropFillColor="@color/colorAccent"-->
-        <!--app:backdropStrokeColor="@color/colorPrimaryDark"-->
-        <!--app:backdropStrokeWidth="1dp"-->
-        <!--app:horizontalBarThickness="4dp"-->
-        <!--app:thumb="@mipmap/ic_launcher"-->
-        <!--app:tickMarkCount="3"-->
-        <!--app:tickMarkRadius="8dp"/>-->
+            <android.support.v4.view.ViewPager
+                android:id="@+id/viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/content_bar"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    </android.support.design.widget.CoordinatorLayout>
+            <!--<com.etiennelawlor.discreteslider.library.ui.DiscreteSlider-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="64dp"-->
+            <!--android:layout_gravity="bottom"-->
+            <!--android:background="@color/colorPrimary"-->
+            <!--android:paddingLeft="8dp"-->
+            <!--android:paddingRight="8dp"-->
+            <!--app:backdropFillColor="@color/colorAccent"-->
+            <!--app:backdropStrokeColor="@color/colorPrimaryDark"-->
+            <!--app:backdropStrokeWidth="1dp"-->
+            <!--app:horizontalBarThickness="4dp"-->
+            <!--app:thumb="@mipmap/ic_launcher"-->
+            <!--app:tickMarkCount="3"-->
+            <!--app:tickMarkRadius="8dp"/>-->
+
+        </android.support.design.widget.CoordinatorLayout>
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:headerLayout="@layout/nav_header_main"
+            app:menu="@menu/activity_main_drawer"/>
+    </android.support.v4.widget.DrawerLayout>
 </layout>

@@ -24,15 +24,24 @@ public class Girl extends BaseObservable implements Parcelable {
     };
     private String desc;
     private String url;
+    public int isRead;
 
     public Girl(String desc, String url) {
         this.desc = desc;
         this.url = url;
+        this.isRead = 0;
+    }
+
+    public Girl(String desc, String url, boolean isRead) {
+        this.desc = desc;
+        this.url = url;
+        this.isRead = isRead ? 1 : 0;
     }
 
     protected Girl(Parcel in) {
         desc = in.readString();
         url = in.readString();
+        isRead = in.readInt();
     }
 
     @Bindable
@@ -55,6 +64,16 @@ public class Girl extends BaseObservable implements Parcelable {
         notifyPropertyChanged(BR.desc);
     }
 
+    @Bindable
+    public int getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(int isRead) {
+        this.isRead = isRead;
+        notifyPropertyChanged(BR.isRead);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -64,5 +83,12 @@ public class Girl extends BaseObservable implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(desc);
         parcel.writeString(url);
+        parcel.writeInt(isRead);
+    }
+
+    @Override
+    public String toString() {
+        return "Desc:" + desc +
+                "\nUrl:" + url;
     }
 }

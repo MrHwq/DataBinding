@@ -9,17 +9,19 @@ import com.hwqgooo.databinding.command.ReplyCommand;
 import com.hwqgooo.databinding.model.bean.Girl;
 
 import me.tatarka.bindingcollectionadapter.ItemView;
+import me.tatarka.bindingcollectionadapter.LayoutManagers;
 
 /**
  * Created by weiqiang on 2016/7/9.
  */
 public abstract class BaseGirlVM {
-    public ObservableList<Girl> girls = new ObservableArrayList<>();
+    public ObservableList<Girl> items = new ObservableArrayList<>();
     public ObservableBoolean isRefreshing = new ObservableBoolean(false);
     public ItemView itemView;
     public ReplyCommand onRefresh;
     public ReplyCommand onLoadMore;
     public ReplyCommand<Integer> onItemClick;
+    public LayoutManagers.LayoutManagerFactory factory;
 
     //第一次运行准备数据
     public abstract void onStart();
@@ -33,7 +35,7 @@ public abstract class BaseGirlVM {
     //重置vm与context有关的变量
     public abstract void onRestart(Context context);
 
-    public ObservableList<Girl> getGirls() {
-        return girls;
+    public ObservableList<Girl> getItems() {
+        return items;
     }
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_douban"
+            android:icon="@mipmap/douban"
+            android:title="豆瓣"/>
+        <item
+            android:id="@+id/nav_mzian"
+            android:checked="true"
+            android:icon="@mipmap/douban"
+            android:title="妹子庵"/>
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@mipmap/douban"
+                android:title="Share"/>
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@mipmap/douban"
+                android:title="Send"/>
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@mipmap/douban"
+                android:title="关于"/>
+            <item
+                android:id="@+id/nav_feedback"
+                android:icon="@mipmap/douban"
+                android:title="反馈"/>
+        </menu>
+    </item>
+
+</menu>

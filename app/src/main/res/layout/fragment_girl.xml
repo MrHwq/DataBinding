@@ -9,6 +9,8 @@
 
         <import type="android.support.v7.widget.StaggeredGridLayoutManager"/>
 
+        <import type="android.support.v7.widget.LinearLayoutManager"/>
+
         <import type="com.hwqgooo.databinding.ui.showgirl.GirlAdapter"/>
 
         <variable
@@ -29,9 +31,10 @@
             android:layout_height="match_parent"
             app:adapter='@{"com.hwqgooo.databinding.ui.showgirl.GirlAdapter"}'
             app:itemView="@{basegirlvm.itemView}"
-            app:items="@{basegirlvm.girls}"
-            app:layoutManager="@{LayoutManagers.staggeredGrid(2, StaggeredGridLayoutManager.VERTICAL)}"
+            app:items="@{basegirlvm.items}"
+            app:layoutManager="@{basegirlvm.factory}"
             app:onItemClickCommand="@{basegirlvm.onItemClick}"
             app:onLoadMoreCommand="@{basegirlvm.onLoadMore}"/>
+
     </android.support.v4.widget.SwipeRefreshLayout>
 </layout>

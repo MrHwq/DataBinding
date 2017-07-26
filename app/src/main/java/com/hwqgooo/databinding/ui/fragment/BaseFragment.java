@@ -47,8 +47,4 @@ public abstract class BaseFragment extends Fragment {
     public abstract void onViewDisappear();
 
     public abstract void onViewFirstAppear();
-
-    public abstract String getTitle();
-
-    public abstract void setTitle(String title);
 }

@@ -1,4 +1,4 @@
-package com.hwqgooo.databinding.ui.showgirlphoto;
+package com.hwqgooo.databinding.ui.showmzitu;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -14,36 +14,42 @@ import android.support.v7.app.AppCompatActivity;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
 import com.hwqgooo.databinding.R;
-import com.hwqgooo.databinding.databinding.ActivityGirlPhotoBinding;
-import com.hwqgooo.databinding.model.bean.Girl;
+import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
+import com.hwqgooo.databinding.databinding.ItemGirlBinding;
+import com.hwqgooo.databinding.model.bean.GirlGallery;
+import com.hwqgooo.databinding.ui.showgirlphoto.GirlPhotoGalleryActivity;
+import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
+import com.hwqgooo.databinding.viewmodel.MZituGalleryVM;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by weiqiang on 2016/7/9.
+ * Created by weiqiang on 2017/1/5.
  */
-public class GirlPhotoActivity extends AppCompatActivity {
+
+public class MzituGalleryActivity extends AppCompatActivity {
     final static String TAG = "GirlPhotoActivity";
-    ActivityGirlPhotoBinding binding;
-    Girl girl;
-    int index;
+    FragmentGirlBinding binding;
 
-    public static void launch(Context context, View childView, int position, Girl girl) {
-        final Intent intent = new Intent(context, GirlPhotoActivity.class);
-        intent.putExtra("index", position);
-        intent.putExtra("girl", girl);
+    MZituGalleryVM vm;
+    String url;
 
-        Log.d(TAG, "onItemClick: " + girl.getDesc());
+    public static void launch(Context context, View childView, GirlGallery gallery) {
+        final Intent intent = new Intent(context, MzituGalleryActivity.class);
+        intent.putExtra("url", gallery.href);
+
+        Log.d(TAG, "onItemClick: " + gallery.desc);
         final ActivityOptionsCompat options;
 
         if (Build.VERSION.SDK_INT >= 21) {
             options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    (Activity)context, childView, girl.getDesc());
+                    (Activity) context, childView, gallery.desc);
         } else {
             options = ActivityOptionsCompat.makeScaleUpAnimation(
                     childView, 0, 0, childView.getWidth(), childView.getHeight());
@@ -60,21 +66,17 @@ public class GirlPhotoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // inside your activity (if you did not enable transitions in your theme)
-//        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-// set an enter transition
-//        getWindow().setEnterTransition(new Explode());
-// set an exit transition
-//        getWindow().setExitTransition(new Explode());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setSharedElementEnterTransition(enterTransition());
             getWindow().setSharedElementReturnTransition(returnTransition());
         }
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_girl_photo);
-        Bundle bundle = getIntent().getExtras();
-        index = bundle.getInt("index");
-        girl = bundle.getParcelable("girl");
-        binding.setGirl(girl);
+        binding = DataBindingUtil.setContentView(this, R.layout.fragment_girl);
+        url = getIntent().getStringExtra("url");
+        if (vm == null) {
+            vm = MZituGalleryVM.getInstance(url);
+        }
+        binding.setBasegirlvm(vm);
+        binding.swipeRefreshLayout.setEnabled(false);
         setEnterSharedElementCallback(new SharedElementCallback() {
             @Override
             public void onSharedElementStart(List<String> sharedElementNames, List<View>
@@ -97,6 +99,36 @@ public class GirlPhotoActivity extends AppCompatActivity {
                 Log.d(TAG, "onMapSharedElements: ");
             }
         });
+        binding.girlView.addOnItemTouchListener(new OnRcvClickListener<ItemGirlBinding>() {
+            @Override
+            public void onItemClick(ItemGirlBinding binding, int position) {
+                GirlPhotoGalleryActivity.launch(MzituGalleryActivity.this, binding.getRoot(),
+                        position, vm.getItems().get(position).getDesc());
+            }
+        });
+        binding.swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                binding.swipeRefreshLayout.setProgressViewOffset(false, 0,
+                        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24,
+                                getResources().getDisplayMetrics()));
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        vm.onStart();
+        if (vm.selectPage != 0) {
+            binding.girlView.scrollToPosition(vm.selectPage);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        vm.putInstance();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
