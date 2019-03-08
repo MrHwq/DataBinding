@@ -31,7 +31,7 @@ import me.tatarka.bindingcollectionadapter.ItemView;
  * Created by weiqiang on 2016/7/9.
  */
 public class GirlPhotoGalleryActivity extends AppCompatActivity {
-    final static String TAG = "GirlPhotoActivity";
+    final static String TAG = GirlPhotoGalleryActivity.class.getSimpleName();
     PagerGalleryBinding binding;
 
     MZituGalleryVM vm;

@@ -18,7 +18,7 @@ import com.hwqgooo.databinding.model.bean.Girl;
  * Created by weiqiang on 2016/7/6.
  */
 public class GirlPhotoFragment extends DialogFragment {
-    final static String TAG = "GirlPhotoFragment";
+    final static String TAG = GirlPhotoFragment.class.getSimpleName();
     Girl girl;
 
     public static GirlPhotoFragment getInstance(Context context, Girl girl) {

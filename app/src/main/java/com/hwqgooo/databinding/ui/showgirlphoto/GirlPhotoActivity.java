@@ -28,7 +28,7 @@ import java.util.Map;
  * Created by weiqiang on 2016/7/9.
  */
 public class GirlPhotoActivity extends AppCompatActivity {
-    final static String TAG = "GirlPhotoActivity";
+    final static String TAG = GirlPhotoActivity.class.getSimpleName();
     ActivityGirlPhotoBinding binding;
     Girl girl;
     int index;

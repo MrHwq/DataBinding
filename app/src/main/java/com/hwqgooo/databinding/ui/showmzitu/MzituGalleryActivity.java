@@ -34,7 +34,7 @@ import java.util.Map;
  */
 
 public class MzituGalleryActivity extends AppCompatActivity {
-    final static String TAG = "GirlPhotoActivity";
+    final static String TAG = MzituGalleryActivity.class.getSimpleName();
     FragmentGirlBinding binding;
 
     MZituGalleryVM vm;

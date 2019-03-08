@@ -1,23 +1,23 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 28
     dataBinding {
         enabled true
     }
     defaultConfig {
         applicationId "com.hwqgooo.databinding"
-        minSdkVersion 15
-        targetSdkVersion 25
+        minSdkVersion 21
+        targetSdkVersion 28
         versionCode 1
         versionName "${getGitVersion()}"
         buildConfigField "String", "GIT_REVISION", "\"${getGitVersion()}\""
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -37,13 +37,21 @@ android {
     }
     //修改生成的apk名字
     applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def oldFile = output.outputFile
-//            if (variant.buildType.name.equals('release')) {
-            def releaseApkName = 'girl.' + variant.productFlavors[0].name + "." + defaultConfig.versionName + ".${getReleaseApkName()}" + '.apk'
+//        variant.outputs.each { output ->
+//            def oldFile = output.outputFile
+////            if (variant.buildType.name.equals('release')) {
+//            def releaseApkName = 'girl.' + variant.productFlavors[0].name + "." + defaultConfig.versionName + ".${getReleaseApkName()}" + '.apk'
 //            output.outputFile = new File(oldFile.parent, releaseApkName)
-//            }
+////            }
+//        }
+        variant.outputs.all {
+            def releaseApkName = 'girl.' + variant.productFlavors[0].name + "." + defaultConfig.versionName + ".${getReleaseApkName()}" + '.apk'
+            outputFileName = releaseApkName
         }
+    }
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
     }
 }
 
@@ -66,6 +74,7 @@ def getGitVersion() {
 
 allprojects {
     repositories {
+        google()
         maven { url "https://jitpack.io" }
     }
 }
@@ -73,10 +82,11 @@ allprojects {
 buildscript {
     repositories {
         jcenter()
+        google()
         mavenCentral() // add repository
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha8'
+        classpath 'com.android.tools.build:gradle:3.3.1'
         classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2' // add plugin
     }
 }
@@ -86,38 +96,47 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'org.jsoup:jsoup:1.9.2'
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:cardview-v7:25.0.0'
-    compile 'com.android.support:recyclerview-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support:palette-v7:25.0.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'org.jsoup:jsoup:1.9.2'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:animated-vector-drawable:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support:palette-v7:28.0.0'
     /*recyclerview分隔符*/
-    compile 'com.yqritc:recyclerview-flexibledivider:1.2.9'
+    implementation 'com.yqritc:recyclerview-flexibledivider:1.2.9'
     /*retrofit及格式转换*/
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
-    compile 'com.squareup.retrofit2:converter-scalars:2.0.2'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.4.0'
     /*图片加载库*/
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.github.chrisbanes:PhotoView:1.3.0'
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation 'com.github.chrisbanes:PhotoView:1.3.0'
     /*rxjava*/
-    compile 'io.reactivex:rxandroid:1.2.0'
-    compile 'io.reactivex:rxjava:1.1.5'
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex:rxjava:1.3.0'
     /* 圆形imageview */
 //    compile 'de.hdodenhof:circleimageview:2.0.0'
     /* 打标签库 */
-    compile 'me.gujun.android.taggroup:library:1.4@aar'
-    compile 'com.github.lawloretienne:discreteslider:0.0.6'
+    implementation 'me.gujun.android.taggroup:library:1.4@aar'
+    implementation 'com.github.lawloretienne:discreteslider:0.0.6'
     //
 //    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter:1.2.0'
 //    compile 'me.tatarka.bindingcollectionadapter:bindingcollectionadapter-recyclerview:1.2.0'
     /* leakcanary */
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+//    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+//    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+//    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     /* sql */
-    compile 'org.greenrobot:greendao:3.2.2'
+    implementation 'org.greenrobot:greendao:3.2.2'
+
+    // Glimpse A content-aware cropping library for Android.
+    implementation 'com.github.the-super-toys.glimpse-android:glimpse-core:0.0.3'
+    // only required for glide extensions
+    implementation 'com.github.the-super-toys.glimpse-android:glimpse-glide:0.0.3'
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
 }

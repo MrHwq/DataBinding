@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:card="http://schemas.android.com/apk/res-auto">
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
-        <import type="android.view.View"/>
+        <import type="android.view.View" />
 
         <variable
             name="girl"
-            type="com.hwqgooo.databinding.model.bean.Girl"/>
+            type="com.hwqgooo.databinding.model.bean.Girl" />
     </data>
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp"
         card:cardCornerRadius="4dp">
 
         <LinearLayout
@@ -29,32 +29,29 @@
             <ImageView
                 android:id="@+id/girliv"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="200dp"
                 android:layout_weight="1"
                 android:adjustViewBounds="true"
-                android:scaleType="fitXY"
-                android:src="@mipmap/downloads"
+                android:scaleType="centerCrop"
                 android:transitionName="@{girl.desc}"
-                app:uri="@{girl.url}"/>
+                app:uri="@{girl.url}"
+                tools:src="@mipmap/downloads" />
             <!---->
             <!--android:background="?attr/selectableItemBackground"-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@{girl.isRead == 1 ? @color/colorAccent : @color/colorPrimary}"
-                android:orientation="horizontal"
-                android:paddingBottom="10dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="10dp"
-                android:visibility="@{girl.getDesc().isEmpty() ? View.GONE : View.VISIBLE}">
+                android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@{girl.isRead == 1 ? @color/colorAccent : @color/colorPrimary}"
                     android:maxLines="1"
                     android:text="@{girl.getDesc()}"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:visibility="@{girl.getDesc().isEmpty() ? View.GONE : View.VISIBLE}"
+                    tools:background="@color/colorAccent" />
             </LinearLayout>
         </LinearLayout>
     </android.support.v7.widget.CardView>

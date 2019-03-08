@@ -28,7 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    final static String TAG = "MainActivity";
+    final static String TAG = MainActivity.class.getSimpleName();
     ActivityMainBinding binding;
     MainThemeVM vm;
 

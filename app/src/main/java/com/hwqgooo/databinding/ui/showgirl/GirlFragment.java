@@ -31,7 +31,7 @@ import me.tatarka.bindingcollectionadapter.LayoutManagers;
  * Created by weiqiang on 2016/7/2.
  */
 public class GirlFragment extends BaseFragment {
-    final static String TAG = "GirlFragment";
+    final static String TAG = GirlFragment.class.getSimpleName();
     FragmentGirlBinding binding;
     Context context;
     GirlVM girlVm;

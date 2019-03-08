@@ -10,7 +10,7 @@ import java.util.List;
  * Created by weiqiang on 2016/6/11.
  */
 public class TabsPagerAdapter extends FragmentPagerAdapter {
-    public final static String TAG = "TabsPagerAdapter";
+    public final static String TAG = TabsPagerAdapter.class.getSimpleName();
     List<Fragment> lists;
     String[] titles;
 

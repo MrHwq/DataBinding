@@ -15,6 +15,7 @@ import com.hwqgooo.databinding.model.showgirl.IGirlService;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 import java.util.List;
 
 import me.tatarka.bindingcollectionadapter.ItemView;
@@ -28,7 +29,6 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -144,21 +144,23 @@ public class GirlVM extends BaseGirlVM {
     private void load(final boolean isRefresh) {
         Log.d(TAG, "load:" + isRefresh + " ,page:" + page);
         isRefreshing.set(true);
-        final Observable<GirlData> observable = girlService.getGirls(page);
+//        final Observable<GirlData> observable = girlService.getGirls(page);
+        GirlData fake = new GirlData();
+        List<Girl> lists = new LinkedList<>();
+//        lists.add(new Girl("1", "http://img4.imgtn.bdimg.com/it/u=221420021,4143011973&fm=200&gp=0.jpg"));
+        lists.add(new Girl("2", "http://img2.imgtn.bdimg.com/it/u=956448384,367810286&fm=200&gp=0.jpg"));
+        lists.add(new Girl("3", "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=4185542813,2038858819&fm=200&gp=0.jpg"));
+        lists.add(new Girl("4", "http://img5.imgtn.bdimg.com/it/u=2346660794,147430089&fm=200&gp=0.jpg"));
+        lists.add(new Girl("5", "http://img4.imgtn.bdimg.com/it/u=163325580,1839796468&fm=200&gp=0.jpg"));
+        lists.add(new Girl("5", "http://img2.imgtn.bdimg.com/it/u=3120779360,3982822210&fm=200&gp=0.jpg"));
+        lists.add(new Girl("5", "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=91028370,44145306&fm=200&gp=0.jpg"));
+
+        fake.setGirls(lists);
+        Observable<GirlData> observable = Observable.just(fake);
         subscription = observable
                 .subscribeOn(Schedulers.io())
-                .map(new Func1<GirlData, List<Girl>>() {
-                    @Override
-                    public List<Girl> call(GirlData girlData) {
-                        return girlData.getGirls();
-                    }
-                })
-                .doAfterTerminate(new Action0() {
-                    @Override
-                    public void call() {
-                        isRefreshing.set(false);
-                    }
-                })
+                .map(girlData -> girlData.getGirls())
+                .doAfterTerminate(() -> isRefreshing.set(false))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Girl>>() {
                     @Override
