@@ -1,8 +1,10 @@
 package com.hwqgooo.databinding.ui.showgirl;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,19 +15,22 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 
+import com.bumptech.glide.Glide;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
+import com.hwqgooo.databinding.utils.recyclerview.CommonAdapter;
 import com.hwqgooo.databinding.utils.recyclerview.FirstItemSnapHelper;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
 import com.hwqgooo.databinding.viewmodel.GirlVM;
+import com.hwqgooo.jetpack.utils.recyclerview.LayoutManagers;
 
 import java.util.List;
 import java.util.Map;
 
-import me.tatarka.bindingcollectionadapter.LayoutManagers;
 
 /**
  * Created by weiqiang on 2016/7/2.
@@ -37,19 +42,42 @@ public class GirlFragment extends BaseFragment {
     GirlVM girlVm;
     SnapHelper snapHelper = new FirstItemSnapHelper();
 
+    RecyclerView.OnScrollListener listener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int scrollState) {
+            super.onScrollStateChanged(recyclerView, scrollState);
+            switch (scrollState) {
+            case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+            case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
+                // 当ListView处于滑动状态时，停止加载图片，保证操作界面流畅
+                Glide.with(getContext()).pauseRequests();
+                break;
+            case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
+                // 当ListView处于静止状态时，继续加载图片
+                Glide.with(getContext()).resumeRequests();
+                break;
+            }
+        }
+    };
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
-        girlVm = GirlVM.getInstance(context);
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
             Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl, container, false);
+        girlVm = ViewModelProviders.of(getActivity()).get(GirlVM.class);
         binding.setBasegirlvm(girlVm);
+        girlVm.items.observe(this,
+                girls -> {
+                    ((CommonAdapter) binding.girlView.getAdapter()).submitList(girls);
+                });
+        binding.girlView.addOnScrollListener(listener);
         setSwipeRefreshLayout();
         setRecyclerView();
 
@@ -126,18 +154,6 @@ public class GirlFragment extends BaseFragment {
 //        snapHelper.attachToRecyclerView(binding.girlView);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (girlVm != null) {
-            if (!insave) {
-                girlVm.onDestory();
-                girlVm = null;
-            } else {
-                girlVm.onStop();
-            }
-        }
-    }
 
     @Override
     public void onViewDisappear() {
@@ -158,14 +174,6 @@ public class GirlFragment extends BaseFragment {
         insave = false;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null && savedInstanceState.getBoolean("insave")) {
-            girlVm.onRestart(context);
-        }
-        insave = false;
-    }
 
     @Override
     public void onViewFirstAppear() {
@@ -176,6 +184,11 @@ public class GirlFragment extends BaseFragment {
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                         24,
                         getResources().getDisplayMetrics()));
-        girlVm.onStart();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding.girlView.removeOnScrollListener(listener);
     }
 }

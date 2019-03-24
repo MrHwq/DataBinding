@@ -12,8 +12,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.hwqgooo.databinding.command.ReplyCommand;
 
-import glimpse.glide.GlimpseTransformation;
-
 public class ViewBindingAdapter {
     public final static String TAG = "ImageViewBindingAdapter";
 
@@ -138,7 +136,7 @@ public class ViewBindingAdapter {
             Glide.with(imageView.getContext())
                     .load(uri)
                     .apply(new RequestOptions()
-                            .transform(new GlimpseTransformation())
+//                            .transform(new GlimpseTransformation())
                             .diskCacheStrategy(DiskCacheStrategy.RESOURCE))
                     .into(imageView);
 //                    .into(new SimpleTarget<GlideDrawable>() {

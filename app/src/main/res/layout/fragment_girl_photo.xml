@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
-        <import type="com.hwqgooo.databinding.model.bean.Girl"/>
+        <import type="com.hwqgooo.databinding.model.bean.Girl" />
 
         <variable
             name="girl"
-            type="Girl"/>
+            type="Girl" />
     </data>
 
     <ImageView
@@ -19,5 +18,5 @@
         android:adjustViewBounds="true"
         android:scaleType="fitXY"
         android:transitionName="@{girl.desc}"
-        app:uri="@{girl.url}"/>
+        app:uri="@{girl.url}" />
 </layout>

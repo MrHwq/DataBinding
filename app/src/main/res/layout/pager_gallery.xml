@@ -1,34 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
-        <import type="com.hwqgooo.databinding.viewmodel.MZituGalleryVM"/>
-        <import type="me.tatarka.bindingcollectionadapter.ItemView"/>
-        <variable
-            name="item"
-            type="MZituGalleryVM"/>
+        <import type="com.hwqgooo.databinding.viewmodel.MZituGalleryVM" />
 
         <variable
-            name="itemView"
-            type="ItemView"/>
+            name="item"
+            type="MZituGalleryVM" />
+
+        <!--<variable-->
+        <!--name="itemView"-->
+        <!--type="ItemView" />-->
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/viewpager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:CurrentItem="@{item.selectPage}"
-            app:itemView="@{itemView}"
-            app:items="@{item.items}"
-            app:onPageSelectedCommand="@{item.onpageselect}"/>
+        <!--<android.support.v4.view.ViewPager-->
+        <!--android:id="@+id/viewpager"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--app:CurrentItem="@{item.selectPage}"-->
+        <!--app:itemView="@{itemView}"-->
+        <!--app:items="@{item.items}"-->
+        <!--app:onPageSelectedCommand="@{item.onpageselect}"/>-->
 
         <TextView
             android:layout_width="wrap_content"
@@ -36,6 +34,6 @@
             android:layout_gravity="center_horizontal"
 
             android:text="@{item.toast}"
-            tools:text="toast string"/>
+            tools:text="toast string" />
     </FrameLayout>
 </layout>

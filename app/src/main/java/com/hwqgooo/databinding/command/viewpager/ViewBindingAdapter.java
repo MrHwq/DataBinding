@@ -26,15 +26,23 @@ public class ViewBindingAdapter {
             public void onPageScrolled(int position, float positionOffset, int
                     positionOffsetPixels) {
                 if (onPageScrolledCommand != null) {
-                    onPageScrolledCommand.execute(new ViewPagerDataWrapper(position,
-                            positionOffset, positionOffsetPixels, state));
+                    try {
+                        onPageScrolledCommand.execute(new ViewPagerDataWrapper(position,
+                                positionOffset, positionOffsetPixels, state));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
             @Override
             public void onPageSelected(int position) {
                 if (onPageSelectedCommand != null) {
-                    onPageSelectedCommand.execute(position);
+                    try {
+                        onPageSelectedCommand.execute(position);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -42,7 +50,11 @@ public class ViewBindingAdapter {
             public void onPageScrollStateChanged(int state) {
                 this.state = state;
                 if (onPageScrollStateChangedCommand != null) {
-                    onPageScrollStateChangedCommand.execute(state);
+                    try {
+                        onPageScrollStateChangedCommand.execute(state);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });

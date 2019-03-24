@@ -1,21 +1,35 @@
 package com.hwqgooo.databinding.ui.showgirl;
 
 import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
+import android.text.TextUtils;
 
 import com.hwqgooo.databinding.model.bean.Girl;
-
-import me.tatarka.bindingcollectionadapter.BindingRecyclerViewAdapter;
-import me.tatarka.bindingcollectionadapter.ItemViewArg;
+import com.hwqgooo.databinding.utils.recyclerview.CommonAdapter;
+import com.hwqgooo.databinding.utils.recyclerview.ItemViewArg;
+import com.hwqgooo.databinding.viewmodel.GirlVM;
 
 /**
  * Created by weiqiang on 2016/7/6.
  * 主要是为了自定义修改ImageView的尺寸，不然可不需要实现这个类
  */
-public class GirlAdapter extends BindingRecyclerViewAdapter<Girl> {
-    public static final String TAG = "GirlAdapter";
+public class GirlAdapter extends CommonAdapter<Girl> {
+    public static final String TAG = GirlAdapter.class.getName();
+
+    public static DiffUtil.ItemCallback DIFF_CALLBACK = new DiffUtil.ItemCallback<Girl>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull Girl oldBean, @NonNull Girl newBean) {
+            return TextUtils.equals(oldBean.getUrl(), newBean.getUrl());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Girl oldBean, @NonNull Girl newBean) {
+            return TextUtils.equals(oldBean.getUrl(), newBean.getUrl());
+        }
+    };
 
     public GirlAdapter(@NonNull ItemViewArg<Girl> arg) {
-        super(arg);
+        super(arg, GirlVM.diff);
     }
 
 //    @Override

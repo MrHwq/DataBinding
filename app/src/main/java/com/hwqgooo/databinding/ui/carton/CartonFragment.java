@@ -1,5 +1,6 @@
-package com.hwqgooo.databinding.ui.showmzitu;
+package com.hwqgooo.databinding.ui.carton;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -14,17 +15,19 @@ import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
 import com.hwqgooo.databinding.ui.fragment.BaseFragment;
+import com.hwqgooo.databinding.utils.recyclerview.CommonAdapter;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
-import com.hwqgooo.databinding.viewmodel.MzituVM;
+import com.hwqgooo.databinding.viewmodel.CartonAllVM;
 
 /**
  * Created by weiqiang on 2016/7/9.
  */
-public class MzituFragment extends BaseFragment {
-    String TAG;
+public class CartonFragment extends BaseFragment {
+    final String TAG = getClass().getSimpleName();
     FragmentGirlBinding binding;
     Context context;
-    MzituVM mzituVM;
+    CartonAllVM cartonAllVM;
+    boolean insave = false;
 
     @Override
     public void onAttach(Context context) {
@@ -38,10 +41,13 @@ public class MzituFragment extends BaseFragment {
             Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_girl, container, false);
         Bundle argument = getArguments();
-        String subUrl = argument.getString("url");
-        TAG = getClass().getSimpleName() + subUrl;
-        mzituVM = MzituVM.getInstance(context, subUrl);
-        binding.setBasegirlvm(mzituVM);
+        cartonAllVM = ViewModelProviders.of(getActivity()).get(CartonAllVM.class);
+        binding.setBasegirlvm(cartonAllVM);
+        cartonAllVM.items.observe(this,
+                pagedList -> {
+                    System.out.println("=====" + binding.girlView.getAdapter());
+                    ((CommonAdapter) binding.girlView.getAdapter()).submitList(pagedList);
+                });
         setSwipeRefreshLayout();
         setRecyclerView();
 
@@ -67,8 +73,9 @@ public class MzituFragment extends BaseFragment {
 //                fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
 //                FragmentManager fm = getActivity().getSupportFragmentManager();
 //                fragment.show(fm, "fragment_girl_photo");
-                        MzituGalleryActivity.launch(context, binding.girliv,
-                                mzituVM.galleries.get(position));
+                        CartonChapterActivity.launch(context, binding.girliv, position + 1);
+//                        MzituGalleryActivity.launch(context, binding.girliv,
+//                                mzituVM.galleries.get(position));
 //                        GirlPhotoActivity.launch(context, binding.girliv, position,
 //                                mzituVM.getItems().get(position));
                     }
@@ -82,17 +89,8 @@ public class MzituFragment extends BaseFragment {
         super.onDetach();
         Log.d(TAG, "onDetach: ");
         context = null;
-//        if (mzituVM != null) {
-//            if (!insave) {
-//                mzituVM.onDestory();
-//                mzituVM = null;
-//            } else {
-//                mzituVM.onStop();
-//            }
-//        }
-    }
 
-    boolean insave = false;
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -115,7 +113,7 @@ public class MzituFragment extends BaseFragment {
         Log.d(TAG, "onActivityCreated: " + savedInstanceState + ".." + insave);
         if (savedInstanceState != null && savedInstanceState.getBoolean("insave")) {
             Log.d(TAG, "onActivityCreated: " + insave);
-//            mzituVM.onRestart(context);
+//            cartonAllVM.onRestart(context);
         }
         insave = false;
     }
@@ -133,6 +131,5 @@ public class MzituFragment extends BaseFragment {
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                         24,
                         getResources().getDisplayMetrics()));
-//        mzituVM.onStart();
     }
 }

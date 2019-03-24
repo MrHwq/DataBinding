@@ -19,6 +19,7 @@ import android.view.animation.OvershootInterpolator;
 
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.ActivityMainBinding;
+import com.hwqgooo.databinding.ui.carton.CartonFragment;
 import com.hwqgooo.databinding.ui.showgirl.GirlFragment;
 import com.hwqgooo.databinding.ui.showmzitu.MzituFragment;
 import com.hwqgooo.databinding.viewmodel.IToolbarState;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     void initTab() {
         final List<Fragment> lists = new LinkedList<>();
         lists.add(new GirlFragment());
+        lists.add(new CartonFragment());
         String[] subUrls = {"xinggan", "japan", /*"taiwan",*/ "mm"};
         for (int i = 0; i < subUrls.length; ++i) {
             Bundle bundle = new Bundle();
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             lists.add(fragment);
         }
 
-        String[] titles = {"妹子", "性感", "日本", /*"台湾",*/ "清纯"};
+        String[] titles = {"妹子", "卡通", "性感", "日本", /*"台湾",*/ "清纯"};
         TabsPagerAdapter tabs = new TabsPagerAdapter(getSupportFragmentManager(), lists, titles);
         binding.viewpager.setAdapter(tabs);
         binding.tablayout.setupWithViewPager(binding.viewpager);
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     class OnMyOffsetChangedListener implements AppBarLayout.OnOffsetChangedListener {
         @Override
         public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-            IToolbarState state = (IToolbarState) vm;
+            IToolbarState state = vm;
             if (verticalOffset == 0) {
                 if (state.getToolbarState() != IToolbarState.EXPANDED) {
                     state.setToolbarState(IToolbarState.EXPANDED);

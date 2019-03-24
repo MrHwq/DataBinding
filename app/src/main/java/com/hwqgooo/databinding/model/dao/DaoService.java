@@ -8,7 +8,7 @@ import org.greenrobot.greendao.rx.RxQuery;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * Created by weiqiang on 2017/2/8.
@@ -54,13 +54,15 @@ public class DaoService {
 //                subscriber.onCompleted();
 //            }
 //        });
-        return rxVersionGradeQuery.list();
+//        return rxVersionGradeQuery.list();
+        return null;
     }
 
     public Observable<GalleryORM> setRead(String url) {
         GalleryORM orm = new GalleryORM();
         orm.setGalleryUrl(url);
-        return rxVersionGradeDao.insert(orm);
+//        return rxVersionGradeDao.insert(orm);
+        return null;
 //        return Observable.create(new Observable.OnSubscribe<GalleryORM>() {
 //            @Override
 //            public void call(Subscriber<? super GalleryORM> subscriber) {

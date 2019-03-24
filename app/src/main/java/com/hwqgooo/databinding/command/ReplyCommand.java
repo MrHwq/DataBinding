@@ -1,25 +1,24 @@
 package com.hwqgooo.databinding.command;
 
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.functions.Func0;
+
+import java.util.concurrent.Callable;
+
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by kelin on 15-8-4.
  */
 public class ReplyCommand<T> {
+    private Action execute0;
+    private Consumer<T> execute1;
+    private Callable<Boolean> canExecute0;
 
-    private Action0 execute0;
-    private Action1<T> execute1;
-
-    private Func0<Boolean> canExecute0;
-
-    public ReplyCommand(Action0 execute) {
+    public ReplyCommand(Action execute) {
         this.execute0 = execute;
     }
 
-
-    public ReplyCommand(Action1<T> execute) {
+    public ReplyCommand(Consumer<T> execute) {
         this.execute1 = execute;
     }
 
@@ -28,7 +27,7 @@ public class ReplyCommand<T> {
      * @param canExecute0 if this function return true the action execute would be invoked!
      *                    otherwise would't invoked!
      */
-    public ReplyCommand(Action0 execute, Func0<Boolean> canExecute0) {
+    public ReplyCommand(Action execute, Callable<Boolean> canExecute0) {
         this.execute0 = execute;
         this.canExecute0 = canExecute0;
     }
@@ -38,29 +37,38 @@ public class ReplyCommand<T> {
      * @param canExecute0 if this function return true the action execute would be invoked!
      *                    otherwise would't invoked!
      */
-    public ReplyCommand(Action1<T> execute, Func0<Boolean> canExecute0) {
+    public ReplyCommand(Consumer<T> execute, Callable<Boolean> canExecute0) {
         this.execute1 = execute;
         this.canExecute0 = canExecute0;
     }
 
 
     public void execute() {
-        if (execute0 != null && canExecute0()) {
-            execute0.call();
+        try {
+            if (execute0 != null && canExecute0()) {
+                execute0.run();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     private boolean canExecute0() {
-        if (canExecute0 == null) {
-            return true;
+        try {
+            if (canExecute0 == null) {
+                return true;
+            }
+            return canExecute0.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return canExecute0.call();
     }
 
 
-    public void execute(T parameter) {
+    public void execute(T parameter) throws Exception {
         if (execute1 != null && canExecute0()) {
-            execute1.call(parameter);
+            execute1.accept(parameter);
         }
     }
 }

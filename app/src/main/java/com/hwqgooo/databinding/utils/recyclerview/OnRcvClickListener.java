@@ -14,7 +14,7 @@ public abstract class OnRcvClickListener<T extends ViewDataBinding>
         implements RecyclerView.OnItemTouchListener {
     private GestureDetector mGestureDetector;
 
-    public abstract void onItemClick(T binding, int position);
+    public abstract void onItemClick(T binding, int position) throws Exception;
 
     public void onItemLongClick(T binding, int position) {
     }
@@ -54,7 +54,8 @@ public abstract class OnRcvClickListener<T extends ViewDataBinding>
                                 rv.getChildLayoutPosition(childView));
                         return true;
                     } catch (Exception exception) {
-                        throw exception;
+                        exception.printStackTrace();
+                        return false;
                     }
                 }
 

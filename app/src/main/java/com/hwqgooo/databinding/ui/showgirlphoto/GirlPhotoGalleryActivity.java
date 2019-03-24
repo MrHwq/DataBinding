@@ -17,15 +17,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
-import com.hwqgooo.databinding.BR;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.PagerGalleryBinding;
 import com.hwqgooo.databinding.viewmodel.MZituGalleryVM;
 
 import java.util.List;
 import java.util.Map;
-
-import me.tatarka.bindingcollectionadapter.ItemView;
 
 /**
  * Created by weiqiang on 2016/7/9.
@@ -51,11 +48,7 @@ public class GirlPhotoGalleryActivity extends AppCompatActivity {
                     childView, 0, 0, childView.getWidth(), childView.getHeight());
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            context.startActivity(intent, options.toBundle());
-        } else {
-            context.startActivity(intent);
-        }
+        context.startActivity(intent, options.toBundle());
     }
 
     //Activity.supportFinishAfterTransition() method instead of Activity.finish()
@@ -72,7 +65,7 @@ public class GirlPhotoGalleryActivity extends AppCompatActivity {
             vm = MZituGalleryVM.getInstance(null);
         }
         binding.setItem(vm);
-        binding.setItemView(ItemView.of(BR.girl, R.layout.activity_girl_photo));
+//        binding.setItemView(ItemView.of(BR.girl, R.layout.activity_girl_photo));
         setEnterSharedElementCallback(new SharedElementCallback() {
             @Override
             public void onSharedElementStart(List<String> sharedElementNames, List<View>
@@ -95,12 +88,12 @@ public class GirlPhotoGalleryActivity extends AppCompatActivity {
                 Log.d(TAG, "onMapSharedElements: ");
             }
         });
-        binding.viewpager.post(new Runnable() {
-            @Override
-            public void run() {
-                binding.viewpager.setCurrentItem(index, false);
-            }
-        });
+//        binding.viewpager.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                binding.viewpager.setCurrentItem(index, false);
+//            }
+//        });
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

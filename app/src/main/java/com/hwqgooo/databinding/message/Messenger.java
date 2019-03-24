@@ -7,9 +7,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
-import rx.functions.Action0;
-import rx.functions.Action1;
+import io.reactivex.functions.Action;
+
 
 /**
  * Created by kelin on 15-8-14.
@@ -40,7 +41,7 @@ public class Messenger {
 
     private static <T> void unregisterFromLists(
             Object recipient,
-            Action1<T> action,
+            Consumer<T> action,
             HashMap<Type, List<WeakActionAndToken>> lists,
             Class<T> tClass) {
         Type messageType = tClass;
@@ -68,7 +69,7 @@ public class Messenger {
 
     private static void unregisterFromLists(
             Object recipient,
-            Action0 action,
+            Action action,
             HashMap<Type, List<WeakActionAndToken>> lists
     ) {
         Type messageType = NotMsgType.class;
@@ -97,7 +98,7 @@ public class Messenger {
     private static <T> void unregisterFromLists(
             Object recipient,
             Object token,
-            Action1<T> action,
+            Consumer<T> action,
             HashMap<Type, List<WeakActionAndToken>> lists, Class<T> tClass) {
         Type messageType = tClass;
 
@@ -124,6 +125,132 @@ public class Messenger {
         }
     }
 
+    private static void sendToList(
+            Collection<WeakActionAndToken> list,
+            Type messageTargetType,
+            Object token) throws Exception {
+        if (list != null) {
+            // Clone to protect from people registering in a "receive message" method
+            // Bug correction Messaging BL0004.007
+            ArrayList<WeakActionAndToken> listClone = new ArrayList<>();
+            listClone.addAll(list);
+
+            for (WeakActionAndToken item : listClone) {
+                WeakAction executeAction = item.getAction();
+                if (executeAction != null
+                        && item.getAction().isLive()
+                        && item.getAction().getTarget() != null
+                        && (messageTargetType == null
+                        || item.getAction().getTarget().getClass() == messageTargetType
+                        || classImplements(item.getAction().getTarget().getClass(),
+                        messageTargetType))
+                        && ((item.getToken() == null && token == null)
+                        || item.getToken() != null && item.getToken().equals(token))) {
+                    executeAction.execute();
+                }
+            }
+        }
+    }
+
+    private static <T> void sendToList(
+            T message,
+            Collection<WeakActionAndToken> list,
+            Type messageTargetType,
+            Object token) throws Exception {
+        if (list != null) {
+            // Clone to protect from people registering in a "receive message" method
+            // Bug correction Messaging BL0004.007
+            ArrayList<WeakActionAndToken> listClone = new ArrayList<>();
+            listClone.addAll(list);
+
+            for (WeakActionAndToken item : listClone) {
+                WeakAction executeAction = item.getAction();
+                if (executeAction != null
+                        && item.getAction().isLive()
+                        && item.getAction().getTarget() != null
+                        && (messageTargetType == null
+                        || item.getAction().getTarget().getClass() == messageTargetType
+                        || classImplements(item.getAction().getTarget().getClass(),
+                        messageTargetType))
+                        && ((item.getToken() == null && token == null)
+                        || item.getToken() != null && item.getToken().equals(token))) {
+                    executeAction.execute(message);
+                }
+            }
+        }
+    }
+
+    private static void cleanupList(HashMap<Type, List<WeakActionAndToken>> lists) {
+        if (lists == null) {
+            return;
+        }
+        for (Iterator it = lists.entrySet().iterator(); it.hasNext(); ) {
+            Object key = it.next();
+            List<WeakActionAndToken> itemList = lists.get(key);
+            if (itemList != null) {
+                for (WeakActionAndToken item : itemList) {
+                    if (item.getAction() == null
+                            || !item.getAction().isLive()) {
+                        itemList.remove(item);
+                    }
+                }
+                if (itemList.size() == 0) {
+                    lists.remove(key);
+                }
+            }
+        }
+    }
+
+    private static void unregisterFromLists(
+            Object recipient,
+            Object token,
+            Action action,
+            HashMap<Type, List<WeakActionAndToken>> lists) {
+        Type messageType = NotMsgType.class;
+
+        if (recipient == null
+                || lists == null
+                || lists.size() == 0
+                || !lists.containsKey(messageType)) {
+            return;
+        }
+
+        synchronized (lists) {
+            for (WeakActionAndToken item : lists.get(messageType)) {
+                WeakAction weakActionCasted = (WeakAction) item.getAction();
+
+                if (weakActionCasted != null
+                        && recipient == weakActionCasted.getTarget()
+                        && (action == null
+                        || action == weakActionCasted.getAction())
+                        && (token == null
+                        || token.equals(item.getToken()))) {
+                    item.getAction().markForDeletion();
+                }
+            }
+        }
+    }
+
+    private static boolean classImplements(Type instanceType, Type interfaceType) {
+        if (interfaceType == null
+                || instanceType == null) {
+            return false;
+        }
+        Class[] interfaces = ((Class) instanceType).getInterfaces();
+        for (Class currentInterface : interfaces) {
+            if (currentInterface == interfaceType) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void cleanup() {
+        cleanupList(recipientsOfSubclassesAction);
+        cleanupList(recipientsStrictAction);
+    }
+
     /**
      * @param recipient the receiver,if register in activity the recipient always set "this",
      *                  and "Messenger.getDefault().unregister(this)" in onDestroy,if in ViewModel,
@@ -131,7 +258,7 @@ public class Messenger {
      *                  unregister.
      * @param action    do something on message received
      */
-    public void register(Object recipient, Action0 action) {
+    public void register(Object recipient, Action action) {
         register(recipient, null, false, action);
     }
 
@@ -148,7 +275,7 @@ public class Messenger {
      * @param action                    do something on message received
      */
     public void register(Object recipient, Object token, boolean receiveDerivedMessagesToo,
-                         Action0 action) {
+                         Action action) {
 
         Type messageType = NotMsgType.class;
 
@@ -184,32 +311,6 @@ public class Messenger {
         cleanup();
     }
 
-    private void cleanup() {
-        cleanupList(recipientsOfSubclassesAction);
-        cleanupList(recipientsStrictAction);
-    }
-
-    private static void cleanupList(HashMap<Type, List<WeakActionAndToken>> lists) {
-        if (lists == null) {
-            return;
-        }
-        for (Iterator it = lists.entrySet().iterator(); it.hasNext(); ) {
-            Object key = it.next();
-            List<WeakActionAndToken> itemList = lists.get(key);
-            if (itemList != null) {
-                for (WeakActionAndToken item : itemList) {
-                    if (item.getAction() == null
-                            || !item.getAction().isLive()) {
-                        itemList.remove(item);
-                    }
-                }
-                if (itemList.size() == 0) {
-                    lists.remove(key);
-                }
-            }
-        }
-    }
-
     /**
      * @param recipient                 the receiver,if register in activity the recipient always
      *                                  set "this",
@@ -220,7 +321,7 @@ public class Messenger {
      * @param receiveDerivedMessagesToo whether Derived class of recipient can receive the message
      * @param action                    do something on message received
      */
-    public void register(Object recipient, boolean receiveDerivedMessagesToo, Action0 action) {
+    public void register(Object recipient, boolean receiveDerivedMessagesToo, Action action) {
         register(recipient, null, receiveDerivedMessagesToo, action);
     }
 
@@ -233,22 +334,22 @@ public class Messenger {
      *                  it will receive this msg
      * @param action    do something on message received
      */
-    public void register(Object recipient, Object token, Action0 action) {
+    public void register(Object recipient, Object token, Action action) {
         register(recipient, token, false, action);
     }
 
     /**
-     * @param recipient {@link com.kelin.mvvmlight.messenger.Messenger#register(Object, Action0)}
+     * @param recipient
      * @param tClass    class of T
      * @param action    this action has one params that type of tClass
      * @param <T>       message data type
      */
-    public <T> void register(Object recipient, Class<T> tClass, Action1<T> action) {
-        register(recipient, null, false, action, tClass);
+    public <T> void register(Object recipient, Class<T> tClass, Consumer<T> action) {
+//        register(recipient, null, false, action, tClass);
     }
 
     /**
-     * see {@link com.kelin.mvvmlight.messenger.Messenger#register(Object, Object, Class, Action1)}
+     * see {
      *
      * @param recipient                 receiver of message
      * @param token                     register with a unique token,when a messenger send a msg
@@ -259,7 +360,7 @@ public class Messenger {
      * @param <T>                       message data type
      */
     public <T> void register(Object recipient, Object token, boolean receiveDerivedMessagesToo,
-                             Action1<T> action, Class<T> tClass) {
+                             Consumer<T> action, Class<T> tClass) {
 
         Type messageType = tClass;
 
@@ -288,16 +389,14 @@ public class Messenger {
             list = recipients.get(messageType);
         }
 
-        WeakAction weakAction = new WeakAction<T>(recipient, action);
-
-        WeakActionAndToken item = new WeakActionAndToken(weakAction, token);
-        list.add(item);
-        cleanup();
+//        WeakAction weakAction = new WeakAction<T>(recipient, action);
+//
+//        WeakActionAndToken item = new WeakActionAndToken(weakAction, token);
+//        list.add(item);
+//        cleanup();
     }
 
     /**
-     * see {@link com.kelin.mvvmlight.messenger.Messenger#register(Object, Class, Action1)}
-     *
      * @param recipient                 receiver of message
      * @param receiveDerivedMessagesToo whether derived class of recipient can receive the message
      * @param tClass                    class of T
@@ -305,13 +404,11 @@ public class Messenger {
      * @param <T>                       message data type
      */
     public <T> void register(Object recipient, boolean receiveDerivedMessagesToo, Class<T>
-            tClass, Action1<T> action) {
-        register(recipient, null, receiveDerivedMessagesToo, action, tClass);
+            tClass, Consumer<T> action) {
+//        register(recipient, null, receiveDerivedMessagesToo, action, tClass);
     }
 
     /**
-     * see {@link com.kelin.mvvmlight.messenger.Messenger#register(Object, Object, Action0)}
-     *
      * @param recipient receiver of message
      * @param token     register with a unique token,when a messenger send a msg with same token,
      *                  it will receive this msg
@@ -319,19 +416,19 @@ public class Messenger {
      * @param action    this action has one params that type of tClass
      * @param <T>       message data type
      */
-    public <T> void register(Object recipient, Object token, Class<T> tClass, Action1<T> action) {
-        register(recipient, token, false, action, tClass);
+    public <T> void register(Object recipient, Object token, Class<T> tClass, Consumer<T> action) {
+//        register(recipient, token, false, action, tClass);
     }
 
     /**
      * @param token send with a unique token,when a receiver has register with same token,it will
      *              receive this msg
      */
-    public void sendNoMsg(Object token) {
+    public void sendNoMsg(Object token) throws Exception {
         sendToTargetOrType(null, token);
     }
 
-    private void sendToTargetOrType(Type messageTargetType, Object token) {
+    private void sendToTargetOrType(Type messageTargetType, Object token) throws Exception {
         Class messageType = NotMsgType.class;
         if (recipientsOfSubclassesAction != null) {
             // Clone to protect from people registering in a "receive message" method
@@ -363,48 +460,6 @@ public class Messenger {
         cleanup();
     }
 
-    private static boolean classImplements(Type instanceType, Type interfaceType) {
-        if (interfaceType == null
-                || instanceType == null) {
-            return false;
-        }
-        Class[] interfaces = ((Class) instanceType).getInterfaces();
-        for (Class currentInterface : interfaces) {
-            if (currentInterface == interfaceType) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static void sendToList(
-            Collection<WeakActionAndToken> list,
-            Type messageTargetType,
-            Object token) {
-        if (list != null) {
-            // Clone to protect from people registering in a "receive message" method
-            // Bug correction Messaging BL0004.007
-            ArrayList<WeakActionAndToken> listClone = new ArrayList<>();
-            listClone.addAll(list);
-
-            for (WeakActionAndToken item : listClone) {
-                WeakAction executeAction = item.getAction();
-                if (executeAction != null
-                        && item.getAction().isLive()
-                        && item.getAction().getTarget() != null
-                        && (messageTargetType == null
-                        || item.getAction().getTarget().getClass() == messageTargetType
-                        || classImplements(item.getAction().getTarget().getClass(),
-                        messageTargetType))
-                        && ((item.getToken() == null && token == null)
-                        || item.getToken() != null && item.getToken().equals(token))) {
-                    executeAction.execute();
-                }
-            }
-        }
-    }
-
     /**
      * send to recipient directly with has not any message
      *
@@ -412,7 +467,7 @@ public class Messenger {
      *               activity
      *               it will receive the message
      */
-    public void sendNoMsgToTarget(Object target) {
+    public void sendNoMsgToTarget(Object target) throws Exception {
         sendToTargetOrType(target.getClass(), null);
     }
 
@@ -427,7 +482,7 @@ public class Messenger {
      *               activity
      *               it will receive the message
      */
-    public void sendNoMsgToTargetWithToken(Object token, Object target) {
+    public void sendNoMsgToTargetWithToken(Object token, Object target) throws Exception {
         sendToTargetOrType(target.getClass(), token);
     }
 
@@ -437,11 +492,11 @@ public class Messenger {
      * @param message any object can to be a message
      * @param <T>     message data type
      */
-    public <T> void send(T message) {
+    public <T> void send(T message) throws Exception {
         sendToTargetOrType(message, null, null);
     }
 
-    private <T> void sendToTargetOrType(T message, Type messageTargetType, Object token) {
+    private <T> void sendToTargetOrType(T message, Type messageTargetType, Object token) throws Exception {
         Class messageType = message.getClass();
 
 
@@ -475,34 +530,6 @@ public class Messenger {
         cleanup();
     }
 
-    private static <T> void sendToList(
-            T message,
-            Collection<WeakActionAndToken> list,
-            Type messageTargetType,
-            Object token) {
-        if (list != null) {
-            // Clone to protect from people registering in a "receive message" method
-            // Bug correction Messaging BL0004.007
-            ArrayList<WeakActionAndToken> listClone = new ArrayList<>();
-            listClone.addAll(list);
-
-            for (WeakActionAndToken item : listClone) {
-                WeakAction executeAction = item.getAction();
-                if (executeAction != null
-                        && item.getAction().isLive()
-                        && item.getAction().getTarget() != null
-                        && (messageTargetType == null
-                        || item.getAction().getTarget().getClass() == messageTargetType
-                        || classImplements(item.getAction().getTarget().getClass(),
-                        messageTargetType))
-                        && ((item.getToken() == null && token == null)
-                        || item.getToken() != null && item.getToken().equals(token))) {
-                    executeAction.execute(message);
-                }
-            }
-        }
-    }
-
     /**
      * send the message type of T, all receiver can receive the message
      *
@@ -511,23 +538,8 @@ public class Messenger {
      *                will receive this message
      * @param <T>     message data type
      */
-    public <T> void send(T message, Object token) {
+    public <T> void send(T message, Object token) throws Exception {
         sendToTargetOrType(message, null, token);
-    }
-
-    /**
-     * send message to recipient directly
-     *
-     * @param message any object can to be a message
-     * @param target  send to recipient directly with has not any message,
-     *                Messenger.getDefault().register(this, ..) in a activity,if target set this
-     *                activity
-     *                it will receive the message
-     * @param <T>     message data type
-     * @param <R>     target
-     */
-    public <T, R> void sendToTarget(T message, R target) {
-        sendToTargetOrType(message, target.getClass(), null);
     }
 
     /**
@@ -571,34 +583,19 @@ public class Messenger {
         cleanup();
     }
 
-    private static void unregisterFromLists(
-            Object recipient,
-            Object token,
-            Action0 action,
-            HashMap<Type, List<WeakActionAndToken>> lists) {
-        Type messageType = NotMsgType.class;
-
-        if (recipient == null
-                || lists == null
-                || lists.size() == 0
-                || !lists.containsKey(messageType)) {
-            return;
-        }
-
-        synchronized (lists) {
-            for (WeakActionAndToken item : lists.get(messageType)) {
-                WeakAction weakActionCasted = (WeakAction) item.getAction();
-
-                if (weakActionCasted != null
-                        && recipient == weakActionCasted.getTarget()
-                        && (action == null
-                        || action == weakActionCasted.getAction())
-                        && (token == null
-                        || token.equals(item.getToken()))) {
-                    item.getAction().markForDeletion();
-                }
-            }
-        }
+    /**
+     * send message to recipient directly
+     *
+     * @param message any object can to be a message
+     * @param target  send to recipient directly with has not any message,
+     *                Messenger.getDefault().register(this, ..) in a activity,if target set this
+     *                activity
+     *                it will receive the message
+     * @param <T>     message data type
+     * @param <R>     target
+     */
+    public <T, R> void sendToTarget(T message, R target) throws Exception {
+        sendToTargetOrType(message, target.getClass(), null);
     }
 
     public static class NotMsgType {

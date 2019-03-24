@@ -1,7 +1,8 @@
-package com.hwqgooo.databinding.ui.showmzitu;
+package com.hwqgooo.databinding.ui.carton;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -21,9 +22,9 @@ import android.view.animation.DecelerateInterpolator;
 import com.hwqgooo.databinding.R;
 import com.hwqgooo.databinding.databinding.FragmentGirlBinding;
 import com.hwqgooo.databinding.databinding.ItemGirlBinding;
-import com.hwqgooo.databinding.model.bean.GirlGallery;
+import com.hwqgooo.databinding.utils.recyclerview.CommonAdapter;
 import com.hwqgooo.databinding.utils.recyclerview.OnRcvClickListener;
-import com.hwqgooo.databinding.viewmodel.MZituGalleryVM;
+import com.hwqgooo.databinding.viewmodel.CartonChapterVM;
 
 import java.util.List;
 import java.util.Map;
@@ -32,49 +33,36 @@ import java.util.Map;
  * Created by weiqiang on 2017/1/5.
  */
 
-public class MzituGalleryActivity extends AppCompatActivity {
-    final static String TAG = MzituGalleryActivity.class.getSimpleName();
+public class CartonChapterActivity extends AppCompatActivity {
+    final static String TAG = CartonChapterActivity.class.getSimpleName();
     FragmentGirlBinding binding;
 
-    MZituGalleryVM vm;
-    String url;
+    CartonChapterVM vm;
+    int id;
 
-    public static void launch(Context context, View childView, GirlGallery gallery) {
-        final Intent intent = new Intent(context, MzituGalleryActivity.class);
-        intent.putExtra("url", gallery.href);
+    public static void launch(Context context, View childView, int id) {
+        final Intent intent = new Intent(context, CartonChapterActivity.class);
+        intent.putExtra("id", id);
 
-        Log.d(TAG, "onItemClick: " + gallery.desc);
         final ActivityOptionsCompat options;
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    (Activity) context, childView, gallery.desc);
-        } else {
-            options = ActivityOptionsCompat.makeScaleUpAnimation(
-                    childView, 0, 0, childView.getWidth(), childView.getHeight());
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            context.startActivity(intent, options.toBundle());
-        } else {
-            context.startActivity(intent);
-        }
+        options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                (Activity) context, childView, "id");
+        context.startActivity(intent, options.toBundle());
     }
 
     //Activity.supportFinishAfterTransition() method instead of Activity.finish()
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setSharedElementEnterTransition(enterTransition());
-            getWindow().setSharedElementReturnTransition(returnTransition());
-        }
+        getWindow().setSharedElementEnterTransition(enterTransition());
+        getWindow().setSharedElementReturnTransition(returnTransition());
+
         binding = DataBindingUtil.setContentView(this, R.layout.fragment_girl);
-        url = getIntent().getStringExtra("url");
-        if (vm == null) {
-            vm = MZituGalleryVM.getInstance(url);
-        }
+        id = getIntent().getIntExtra("id", 1);
+        vm = ViewModelProviders.of(this).get(CartonChapterVM.class);
+        vm.setId(id);
         binding.setBasegirlvm(vm);
+        binding.executePendingBindings();
         binding.swipeRefreshLayout.setEnabled(false);
         setEnterSharedElementCallback(new SharedElementCallback() {
             @Override
@@ -101,33 +89,26 @@ public class MzituGalleryActivity extends AppCompatActivity {
         binding.girlView.addOnItemTouchListener(new OnRcvClickListener<ItemGirlBinding>() {
             @Override
             public void onItemClick(ItemGirlBinding binding, int position) {
-//                GirlPhotoGalleryActivity.launch(MzituGalleryActivity.this, binding.getRoot(),
+//                GirlPhotoGalleryActivity.launch(CartonChapterActivity.this, binding.getRoot(),
 //                        position, vm.getItems().get(position).getDesc());
+                CartonGalleryActivity.launch(CartonChapterActivity.this, binding.getRoot(),
+                        id, position + 1);
             }
         });
-        binding.swipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                binding.swipeRefreshLayout.setProgressViewOffset(false, 0,
-                        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24,
-                                getResources().getDisplayMetrics()));
-            }
+        binding.swipeRefreshLayout.post(() -> {
+            binding.swipeRefreshLayout.setProgressViewOffset(false, 0,
+                    (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24,
+                            getResources().getDisplayMetrics()));
+            vm.items.observe(this,
+                    pagedList -> {
+                        System.out.println("=====" + binding.girlView.getAdapter());
+                        try {
+                            ((CommonAdapter) binding.girlView.getAdapter()).submitList(pagedList);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        vm.onStart();
-        if (vm.selectPage != 0) {
-            binding.girlView.scrollToPosition(vm.selectPage);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        vm.putInstance();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -152,8 +133,6 @@ public class MzituGalleryActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            finishAfterTransition();
-        }
+        finishAfterTransition();
     }
 }

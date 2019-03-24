@@ -1,9 +1,8 @@
-package me.tatarka.bindingcollectionadapter;
+package com.hwqgooo.databinding.utils.recyclerview;
 
-/**
- * You may extend this instead of {@link ItemViewSelector} if you do not need to implement {@link
- * #viewTypeCount()}, which is currently only used for {@link BindingListViewAdapter}.
- */
+import com.hwqgooo.jetpack.utils.recyclerview.ItemView;
+import com.hwqgooo.jetpack.utils.recyclerview.ItemViewSelector;
+
 public abstract class BaseItemViewSelector<T> implements ItemViewSelector<T> {
     private static final ItemViewSelector EMPTY = new BaseItemViewSelector() {
         @Override

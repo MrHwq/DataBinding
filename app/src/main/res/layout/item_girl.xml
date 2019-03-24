@@ -21,38 +21,35 @@
         android:layout_marginBottom="5dp"
         card:cardCornerRadius="4dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/girliv"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
+                android:src="@mipmap/downloads"
                 android:transitionName="@{girl.desc}"
-                app:uri="@{girl.url}"
-                tools:src="@mipmap/downloads" />
-            <!---->
-            <!--android:background="?attr/selectableItemBackground"-->
-            <LinearLayout
+                app:uri="@{girl.url}" />
+
+            <TextView
+                android:id="@+id/desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_alignBottom="@+id/girliv"
+                android:background="@{girl.isRead == 1 ? @color/colorAccent : @color/colorPrimary}"
+                android:maxLines="1"
+                android:text="@{girl.getDesc()}"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:visibility="@{girl.getDesc().isEmpty() ? View.GONE : View.VISIBLE}"
+                tools:background="@color/colorAccent"
+                tools:text="asdasdasd" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@{girl.isRead == 1 ? @color/colorAccent : @color/colorPrimary}"
-                    android:maxLines="1"
-                    android:text="@{girl.getDesc()}"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:visibility="@{girl.getDesc().isEmpty() ? View.GONE : View.VISIBLE}"
-                    tools:background="@color/colorAccent" />
-            </LinearLayout>
-        </LinearLayout>
+            <!---->
+            <!--android:background="?attr/selectableItemBackground"-->
+        </RelativeLayout>
     </android.support.v7.widget.CardView>
 </layout>

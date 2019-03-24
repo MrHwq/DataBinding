@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter.LayoutManagers"/>
+        <import type="android.support.v7.widget.StaggeredGridLayoutManager" />
 
-        <import type="android.support.v7.widget.StaggeredGridLayoutManager"/>
+        <import type="android.support.v7.widget.LinearLayoutManager" />
 
-        <import type="android.support.v7.widget.LinearLayoutManager"/>
-
-        <import type="com.hwqgooo.databinding.ui.showgirl.GirlAdapter"/>
+        <import type="com.hwqgooo.databinding.ui.showgirl.GirlAdapter" />
 
         <variable
             name="basegirlvm"
-            type="com.hwqgooo.databinding.viewmodel.BaseGirlVM"/>
+            type="com.hwqgooo.databinding.viewmodel.BaseGirlVM" />
     </data>
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -29,12 +26,11 @@
             android:id="@+id/girlView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:adapter='@{"com.hwqgooo.databinding.ui.showgirl.GirlAdapter"}'
             app:itemView="@{basegirlvm.itemView}"
-            app:items="@{basegirlvm.items}"
+            app:diff="@{basegirlvm.diff}"
             app:layoutManager="@{basegirlvm.factory}"
             app:onItemClickCommand="@{basegirlvm.onItemClick}"
-            app:onLoadMoreCommand="@{basegirlvm.onLoadMore}"/>
+            app:onLoadMoreCommand="@{basegirlvm.onLoadMore}" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 </layout>

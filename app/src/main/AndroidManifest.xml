@@ -37,6 +37,8 @@
             android:name=".ui.showmzitu.MzituGalleryActivity"
             android:launchMode="singleTask">
         </activity>
+        <activity android:name=".ui.carton.CartonChapterActivity" />
+        <activity android:name=".ui.carton.CartonGalleryActivity" />
     </application>
 
 </manifest>

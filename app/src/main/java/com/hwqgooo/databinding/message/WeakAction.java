@@ -2,33 +2,33 @@ package com.hwqgooo.databinding.message;
 
 import java.lang.ref.WeakReference;
 
-import rx.functions.Action0;
-import rx.functions.Action1;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by kelin on 15-8-14.
  */
 public class WeakAction<T> {
-    private Action0 action;
-    private Action1<T> action1;
+    private Action action;
+    private Consumer<T> action1;
     private boolean isLive;
     private Object target;
     private WeakReference reference;
 
-    public WeakAction(Object target, Action0 action) {
+    public WeakAction(Object target, Action action) {
         reference = new WeakReference(target);
         this.action = action;
 
     }
 
-    public WeakAction(Object target, Action1<T> action1) {
+    public WeakAction(Object target, Consumer<T> action1) {
         reference = new WeakReference(target);
         this.action1 = action1;
     }
 
-    public void execute() {
+    public void execute() throws Exception {
         if (action != null && isLive()) {
-            action.call();
+            action.run();
         }
     }
 
@@ -42,10 +42,9 @@ public class WeakAction<T> {
         return true;
     }
 
-    public void execute(T parameter) {
-        if (action1 != null
-                && isLive()) {
-            action1.call(parameter);
+    public void execute(T parameter) throws Exception {
+        if (action1 != null && isLive()) {
+            action1.accept(parameter);
         }
     }
 
@@ -56,11 +55,11 @@ public class WeakAction<T> {
         action1 = null;
     }
 
-    public Action0 getAction() {
+    public Action getAction() {
         return action;
     }
 
-    public Action1 getAction1() {
+    public Consumer<T> getAction1() {
         return action1;
     }
 
